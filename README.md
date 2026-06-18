@@ -1,36 +1,157 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PathCoder - AI-Powered Coding Challenges
 
-## Getting Started
+PathCoder is a SAAS platform that generates personalized coding projects, tasks, and quizzes based on your learning journey. Unlike generic coding challenge platforms, PathCoder creates content that directly reinforces the specific topics and technologies you've been studying.
 
-First, run the development server:
+## 🌟 Key Features
 
+- **AI-Powered Personalization**: Generate challenges based on your specific learning path
+- **Multi-Language Support**: Covers frontend, backend, and full-stack technologies
+- **Progressive Difficulty**: Adapts from beginner to expert levels
+- **Solution Access**: Learn from complete, well-documented solutions
+- **Real-World Focus**: Projects simulate actual development scenarios
+- **Learning Analytics**: Track progress and identify knowledge gaps
+
+## 🎯 What Makes PathCoder Stand Out
+
+- **Contextual Learning**: Projects are generated based on your specific learning journey
+- **Solution-First Approach**: Access to complete solutions helps users learn best practices
+- **Adaptive Intelligence**: AI understands your progress and creates appropriate challenges
+- **Holistic Skill Building**: Combines project-based learning with theoretical reinforcement
+
+## 💰 Monetization Strategy
+
+### Freemium Model
+- **Free Tier**: 3 projects per month, basic quizzes, community solutions
+- **Pro ($9.99/month)**: Unlimited projects, instant solution access, advanced difficulty levels
+- **Premium ($19.99/month)**: Custom learning paths, team features, progress analytics
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Groq API key (for testing) or OpenAI API key (for production)
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd pathcoder
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+Create a `.env.local` file with:
+```env
+GROQ_API_KEY=your_groq_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+NEXTAUTH_SECRET=your_nextauth_secret
+NEXTAUTH_URL=http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠 Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS v4, Custom design system
+- **UI Components**: Radix UI, Lucide React icons
+- **AI Integration**: Groq SDK (testing), OpenAI (production)
+- **Authentication**: NextAuth.js, Supabase
+- **Database**: Supabase (PostgreSQL)
+- **Deployment**: Vercel (recommended)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📱 Design Philosophy
 
-## Deploy on Vercel
+PathCoder features a mobile-first design that looks great on all devices:
+- **Mobile**: Clean, app-like interface optimized for touch
+- **Desktop**: Professional layout with enhanced functionality
+- **Theme**: White, black, and warm beige (#DCC5B2) color scheme
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🎨 Key Components
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Landing Page
+- Compelling hero section with clear value proposition
+- Feature showcase highlighting unique selling points
+- Transparent pricing with freemium model
+- Professional design that converts visitors to users
+
+### Dashboard
+- Intuitive project generation interface
+- Topic selection based on learning progress
+- Skill level and challenge type customization
+- Progress tracking and analytics
+
+### AI Integration
+- Personalized project generation using Groq/OpenAI
+- Context-aware challenges based on user's learning path
+- Progressive difficulty scaling
+- Real-world project scenarios
+
+## 🔧 API Endpoints
+
+### `/api/generate-project`
+Generates personalized coding challenges based on:
+- Topics learned
+- Skill level (beginner/intermediate/advanced)
+- Project type (project/task/quiz)
+- Tech stack preferences
+- Time constraints
+
+## 🎯 Target Audience
+
+- Self-taught developers seeking structured practice
+- Bootcamp graduates wanting to reinforce learning
+- Computer science students needing practical application
+- Career changers learning programming
+- Developers expanding to new languages/frameworks
+
+## 🏆 Competitive Advantage
+
+PathCoder fills the gap between structured courses and generic challenges by providing **personalized, progressive project generation** that adapts to individual learning journeys.
+
+### vs. Competitors
+- **LeetCode/HackerRank**: Generic algorithmic challenges vs. personalized projects
+- **FreeCodeCamp**: Fixed curriculum vs. adaptive content
+- **Exercism**: Language-specific vs. cross-technology integration
+- **Codecademy**: Course-based vs. project-based practice
+
+## 📈 Future Roadmap
+
+- [ ] Payment integration (Stripe)
+- [ ] Team collaboration features
+- [ ] Advanced analytics dashboard
+- [ ] Mobile app development
+- [ ] Integration with popular learning platforms
+- [ ] Community features and peer learning
+- [ ] Certification and skill verification
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Support
+
+For support, email support@pathcoder.dev or join our Discord community.
+
+---
+
+**PathCoder** - Where personalized learning meets real-world coding practice. 🚀

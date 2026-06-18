@@ -2,25 +2,230 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
+  --primary: #DCC5B2;
+  --primary-dark: #c9ad94;
+  --secondary: #f5f5f5;
+  --accent: #DCC5B2;
+  --muted: #f8f9fa;
+  --border: #e1e5e9;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #000000;
+    --foreground: #ffffff;
+    --secondary: #1a1a1a;
+    --muted: #0f0f0f;
+    --border: #2a2a2a;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01';
+  font-variation-settings: 'opsz' 32;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+/* Smooth transitions */
+* {
+  transition: colors 0.2s ease-in-out;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.modal-blur #__next > *:not(.fixed):not(.z-50) {
+  filter: blur(6px) brightness(0.9);
+  transition: filter 0.3s;
+}
+
+/* Custom styling for challenge instructions */
+.challenge-instructions {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.8;
+  color: #e5e7eb;
+}
+
+.challenge-instructions h1,
+.challenge-instructions h2,
+.challenge-instructions h3 {
+  color: #ffffff;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.challenge-instructions h1 {
+  font-size: 2rem;
+  border-bottom: 2px solid #DCC5B2;
+  padding-bottom: 0.5rem;
+}
+
+.challenge-instructions h2 {
+  font-size: 1.75rem;
+  border-bottom: 1px solid #6b7280;
+  padding-bottom: 0.25rem;
+}
+
+.challenge-instructions h3 {
+  font-size: 1.5rem;
+  color: #DCC5B2;
+}
+
+.challenge-instructions strong {
+  color: #ffffff;
+  font-weight: 700;
+  background: linear-gradient(135deg, #DCC5B2, #B8A082);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.challenge-instructions code {
+  background-color: #1f2937;
+  color: #fbbf24;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+  border: 1px solid #374151;
+  font-weight: 500;
+}
+
+.challenge-instructions ol {
+  list-style-type: none;
+  counter-reset: instruction-counter;
+  margin: 1.5rem 0;
+  padding: 0;
+}
+
+.challenge-instructions ol li {
+  counter-increment: instruction-counter;
+  margin-bottom: 1.25rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #374151;
+  border-radius: 0.75rem;
+  position: relative;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.challenge-instructions ol li::before {
+  content: counter(instruction-counter);
+  position: absolute;
+  top: -0.75rem;
+  left: 1rem;
+  background: linear-gradient(135deg, #DCC5B2, #B8A082);
+  color: #000000;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.challenge-instructions ol li p {
+  margin: 0;
+  padding-left: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #f3f4f6;
+}
+
+.challenge-instructions ul {
+  list-style-type: none;
+  margin: 1.5rem 0;
+  padding: 0;
+}
+
+.challenge-instructions ul li {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  position: relative;
+  font-size: 1.05rem;
+  color: #e5e7eb;
+}
+
+.challenge-instructions ul li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #DCC5B2;
+  font-weight: bold;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.challenge-instructions p {
+  margin-bottom: 1.25rem;
+  line-height: 1.8;
+  font-size: 1.05rem;
+  color: #e5e7eb;
+}
+
+.challenge-instructions blockquote {
+  border-left: 4px solid #DCC5B2;
+  padding-left: 1.5rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid #DCC5B2;
+}
+
+.challenge-instructions em {
+  color: #DCC5B2;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.challenge-instructions .highlight {
+  background: linear-gradient(135deg, #DCC5B2, #B8A082);
+  color: #000000;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
 }
