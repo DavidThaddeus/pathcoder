@@ -163,8 +163,10 @@ INSTRUCTIONS FORMATTING:
       : ''
 
     // Call OpenRouter with the ordered free-model fallback chain. The validator
-    // rejects any model whose output isn't a usable challenge JSON, so the chain
-    // advances to the next model instead of accepting garbage.
+    // only rejects truly unusable JSON (no title/instructions) — a missing/empty
+    // "solution" no longer discards the whole challenge, since that was burning
+    // through every model in the chain and landing on the static fallback. A
+    // missing solution is repaired separately below with a small, focused call.
     const aiResult = await callAI({
       messages: [
         { role: 'system', content: systemPrompt },
@@ -172,7 +174,10 @@ INSTRUCTIONS FORMATTING:
       ],
       temperature: 0.7,
       topP: 0.95,
-      maxTokens: isQuiz ? 4096 : 2048,
+      // Coding/debug responses also carry solution + solutionExplanation + hints,
+      // so they need real headroom — 2048 was truncating mid-solution on longer
+      // languages (Java/C++) and harder skill levels, which broke JSON parsing.
+      maxTokens: isQuiz ? 4096 : 3500,
       jsonMode: true,
       validate: (content) => {
         const parsed = parseChallengeJson(content)
@@ -180,16 +185,33 @@ INSTRUCTIONS FORMATTING:
         if (isQuiz) {
           return Array.isArray(parsed.questions) && parsed.questions.length >= 1
         }
-        // Coding/debug must include a non-empty solution so "Show Solution" works.
-        return typeof parsed.solution === 'string' && parsed.solution.trim().length > 0
+        return true
       },
     })
 
-    const challengeData = aiResult ? parseChallengeJson(aiResult.content) : null
+    let challengeData = aiResult ? parseChallengeJson(aiResult.content) : null
 
     if (!challengeData) {
       console.log('AI service unavailable or returned unusable output — using fallback challenge')
-      return generateQuickFallbackChallenge(topics, skillLevel, projectType, techStack, userId)
+      return await generateQuickFallbackChallenge(topics, skillLevel, projectType, techStack, userId)
+    }
+
+    // Repair pass: coding/debug challenges must ship a working solution. If the
+    // main generation came back without one (truncation, model skipped the
+    // field, etc.), ask for ONLY the solution in a small focused call instead of
+    // discarding the whole challenge — far less likely to fail than the full
+    // generation, and runs through the same Groq/OpenRouter fallback chain.
+    if (!isQuiz) {
+      const hasSolution = typeof challengeData.solution === 'string' && challengeData.solution.trim().length > 0
+      if (!hasSolution) {
+        const repaired = await repairSolution(challengeData, projectType, techStack)
+        if (repaired) {
+          challengeData.solution = repaired.solution
+          if (!challengeData.solutionExplanation) {
+            challengeData.solutionExplanation = repaired.solutionExplanation
+          }
+        }
+      }
     }
 
     // Preserve the model's code VERBATIM — only unescape JSON escape sequences
@@ -236,9 +258,82 @@ INSTRUCTIONS FORMATTING:
   }
 }
 
-// Helper function to generate quick fallback challenges
-function generateQuickFallbackChallenge(topics: string[], skillLevel: string, projectType: string, techStack: string[] | undefined, userId: string | null) {
-  const fallbackChallenge = {
+// Ask the AI for ONLY the solution (+ explanation) given an already-generated
+// challenge. Much smaller/easier than full generation, so it succeeds even
+// when the full-challenge call got truncated. Runs through the same
+// Groq/OpenRouter fallback chain as the main call.
+async function repairSolution(
+  challengeData: any,
+  projectType: string,
+  techStack: string[] | undefined
+): Promise<{ solution: string; solutionExplanation: string } | null> {
+  const isDebug = String(projectType).toLowerCase() === 'debug'
+  const language = challengeData.programmingLanguage || techStack?.[0] || 'JavaScript'
+
+  const prompt = `Given this ${projectType} challenge, provide ONLY the solution as strict JSON.
+
+Title: ${challengeData.title}
+Instructions: ${challengeData.instructions}
+${challengeData.codeSnippet ? `Starter/buggy code:\n${challengeData.codeSnippet}` : ''}
+
+${isDebug
+  ? `This is a DEBUG challenge — "solution" must be the FULL corrected version of the starter code above, with the bug(s) fixed.`
+  : `"solution" must be complete, runnable ${language} code that fully implements the instructions.`
+}
+
+Output STRICT JSON only, exactly this shape:
+{"solution": "the complete working code", "solutionExplanation": "plain-English explanation of how the solution works"}`
+
+  const result = await callAI({
+    messages: [
+      { role: 'system', content: `You are an expert ${language} engineer. Output strict JSON only, no markdown fences, no commentary.` },
+      { role: 'user', content: prompt },
+    ],
+    temperature: 0.5,
+    topP: 0.95,
+    maxTokens: 2048,
+    jsonMode: true,
+    validate: (content) => {
+      const parsed = parseSolutionJson(content)
+      return !!parsed && typeof parsed.solution === 'string' && parsed.solution.trim().length > 0
+    },
+  })
+
+  if (!result) return null
+  const parsed = parseSolutionJson(result.content)
+  if (!parsed || !parsed.solution) return null
+  return {
+    solution: parsed.solution,
+    solutionExplanation: parsed.solutionExplanation || '',
+  }
+}
+
+// Lightweight JSON extractor for the repair call (just solution/solutionExplanation).
+function parseSolutionJson(content: string): { solution?: string; solutionExplanation?: string } | null {
+  if (!content) return null
+  let s = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '')
+  const first = s.indexOf('{')
+  const last = s.lastIndexOf('}')
+  if (first === -1 || last === -1 || last <= first) return null
+  s = s.substring(first, last + 1)
+  try {
+    return JSON.parse(s)
+  } catch {
+    try {
+      return JSON.parse(s.replace(/[ --]/g, ''))
+    } catch {
+      return null
+    }
+  }
+}
+
+// Helper function to generate quick fallback challenges. Only reached when
+// EVERY model in the fallback chain fails to produce even a usable
+// title/instructions — at that point we still try one more focused AI call
+// for the solution rather than shipping a dead placeholder.
+async function generateQuickFallbackChallenge(topics: string[], skillLevel: string, projectType: string, techStack: string[] | undefined, userId: string | null) {
+  const isQuiz = String(projectType).toLowerCase() === 'quiz'
+  const fallbackChallenge: any = {
     title: `${skillLevel.charAt(0).toUpperCase() + skillLevel.slice(1)} ${projectType} Challenge`,
     description: `A ${skillLevel}-level ${projectType} challenge focused on: ${topics.join(', ')}`,
     programmingLanguage: techStack?.[0] || "JavaScript",
@@ -247,19 +342,27 @@ function generateQuickFallbackChallenge(topics: string[], skillLevel: string, pr
     topics: topics,
     instructions: `Create a ${projectType} challenge that focuses on ${topics.join(' and ')}. This is a ${skillLevel}-level challenge that will help you practice and improve your understanding of these concepts.`,
     codeSnippet: "",
-    solution: "// Solution will be provided after you attempt the challenge.",
-    solutionExplanation: "Detailed explanation will be provided after you attempt the challenge.",
+    solution: "",
+    solutionExplanation: "",
     learningObjectives: topics,
-    estimatedTime: skillLevel === 'beginner' ? '15-30 minutes' : 
+    estimatedTime: skillLevel === 'beginner' ? '15-30 minutes' :
                   skillLevel === 'intermediate' ? '30-60 minutes' : '60-120 minutes',
     hints: [
-      "Break down the problem into smaller parts", 
+      "Break down the problem into smaller parts",
       "Review the topics you've learned",
       "Test your solution with different inputs",
       "Consider edge cases in your implementation"
     ]
   }
-  
+
+  if (!isQuiz) {
+    const repaired = await repairSolution(fallbackChallenge, projectType, techStack)
+    if (repaired) {
+      fallbackChallenge.solution = repaired.solution
+      fallbackChallenge.solutionExplanation = repaired.solutionExplanation
+    }
+  }
+
   const finalResponse = {
     ...fallbackChallenge,
     id: generateProjectId(),
