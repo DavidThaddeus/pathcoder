@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Clock, Target, Code, HelpCircle, CheckCircle, Star, Copy, Check } from 'lucide-react'
+import { ArrowLeft, Clock, Target, Code, HelpCircle, CheckCircle, Star, Copy, Check, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import type { Components } from 'react-markdown'
 
@@ -92,12 +92,15 @@ function ChallengePage() {
   const [evaluationResult, setEvaluationResult] = useState<{ result: string; reason: string; attempts?: number; timeTaken?: number } | null>(null)
   const [isEvaluating, setIsEvaluating] = useState(false)
   const [hintTimeout, setHintTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [hintSecondsLeft, setHintSecondsLeft] = useState(0)
+  const [spendingHint, setSpendingHint] = useState(false)
   const [attemptCount, setAttemptCount] = useState(0)
   const [startTime, setStartTime] = useState<Date | null>(null)
   const [challengeFailed, setChallengeFailed] = useState(false)
   // True once saved code has been loaded from localStorage — prevents the
   // initial placeholder from overwriting persisted code before it loads.
   const [codeHydrated, setCodeHydrated] = useState(false)
+  const [reviewMode, setReviewMode] = useState(false)
 
   // Monaco Editor configuration for consistent theming across all languages
   const monacoEditorOptions = {
@@ -485,14 +488,32 @@ function ChallengePage() {
   // newlines, indentation, and fenced code blocks so ReactMarkdown can format it.
   const cleanMarkdown = (text?: string) => {
     if (!text) return ''
-    return text
+    let s = text
       .replace(/\\r\\n/g, '\n')
       .replace(/\\r/g, '\n')
       .replace(/\\n/g, '\n')
       .replace(/\\t/g, '  ')
       .replace(/\\"/g, '"')
       .replace(/\\'/g, "'")
-      .trim()
+
+    // If the whole thing is wrapped in a single code fence, unwrap it —
+    // instructions are prose, not a code block.
+    const fenced = s.trim().match(/^```[a-zA-Z]*\n([\s\S]*?)\n?```$/)
+    if (fenced) s = fenced[1]
+
+    // Dedent: remove the common leading whitespace from every line. The model
+    // often indents the whole block, which Markdown would otherwise treat as a
+    // code block (rendering **bold** and ### headings literally, in monospace).
+    const lines = s.replace(/\t/g, '  ').split('\n')
+    const indents = lines
+      .filter((l) => l.trim().length > 0)
+      .map((l) => l.match(/^ */)![0].length)
+    const minIndent = indents.length ? Math.min(...indents) : 0
+    if (minIndent > 0) {
+      s = lines.map((l) => l.slice(minIndent)).join('\n')
+    }
+
+    return s.trim()
   }
 
   // Helper function to format numbered lists properly
@@ -740,13 +761,25 @@ function ChallengePage() {
 
   // Helper function to render solution content with IDE-like formatting
   const renderSolutionContent = (solution: string | undefined, formattedCode: string) => {
-    if (!solution || !challenge) return null
-    
+    if (!challenge) return null
+
+    // Always have something to show: prefer the formatted code, fall back to the
+    // raw solution string. This makes "Show Solution" work for every language.
+    const codeToShow = (formattedCode && formattedCode.trim()) ? formattedCode : (solution || '').trim()
+
+    if (!codeToShow && !solutionExplanation) {
+      return (
+        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-gray-300">
+          No solution was provided for this challenge.
+        </div>
+      )
+    }
+
     // Get the programming language with better fallback logic
-    const programmingLang = challenge.programmingLanguage?.toLowerCase() || 
-                           challenge.programmingLanguage || 
+    const programmingLang = challenge.programmingLanguage?.toLowerCase() ||
+                           challenge.programmingLanguage ||
                            'javascript'
-    
+
     const normalizedLang = normalizeLanguage(programmingLang)
     return (
       <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-lg border border-gray-700 shadow-lg">
@@ -807,7 +840,7 @@ function ChallengePage() {
             height="400px"
             language={normalizedLang}
             theme="vs-dark"
-            value={formattedCode}
+            value={codeToShow}
             options={{
               ...monacoEditorOptions,
               tabSize: normalizedLang === 'python' ? 4 : 2,
@@ -1497,9 +1530,10 @@ function ChallengePage() {
 
   // Function to handle hints with auto-close
   async function handleShowHints() {
-    if (!user) return
+    if (!user || spendingHint) return // guard against double-clicks / double-spend
+    setSpendingHint(true)
 
-    // Each hint reveal costs 2 coins (deducted from the user's points balance).
+    // Each hint reveal costs exactly 2 coins (atomic on the server).
     try {
       const res = await fetch('/api/spend-coins', {
         method: 'POST',
@@ -1523,39 +1557,40 @@ function ChallengePage() {
       setResultType('error')
       setShowResultModal(true)
       return
+    } finally {
+      setSpendingHint(false)
     }
 
+    // Open the hints with a live 20s countdown.
+    if (hintTimeout) clearInterval(hintTimeout)
     setShowHints(true)
-
-    // Clear any existing timeout
-    if (hintTimeout) {
-      clearTimeout(hintTimeout)
-    }
-
-    // Set auto-close after 20 seconds
-    const timeout = setTimeout(() => {
-      setShowHints(false)
-    }, 20000)
-
-    setHintTimeout(timeout)
+    setHintSecondsLeft(20)
+    const interval = setInterval(() => {
+      setHintSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval)
+          setShowHints(false)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    setHintTimeout(interval)
   }
 
   function handleHideHints() {
     setShowHints(false)
-    
-    // Clear timeout if manually closed
+    setHintSecondsLeft(0)
     if (hintTimeout) {
-      clearTimeout(hintTimeout)
+      clearInterval(hintTimeout)
       setHintTimeout(null)
     }
   }
 
-  // Cleanup timeout on unmount
+  // Cleanup interval on unmount
   useEffect(() => {
     return () => {
-      if (hintTimeout) {
-        clearTimeout(hintTimeout)
-      }
+      if (hintTimeout) clearInterval(hintTimeout)
     }
   }, [hintTimeout])
 
@@ -1587,6 +1622,17 @@ function ChallengePage() {
       } catch {}
     }
     setCodeHydrated(true)
+
+    // Review mode (opened via ?review=1 from a completed/failed card): show the
+    // user's submitted answer read-only + reveal the solution, no re-attempt.
+    const isReview = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('review') === '1'
+    setReviewMode(isReview)
+    if (isReview) {
+      setShowSolution(true)
+      // Mark the quiz as submitted so the picked answers + correct answers and
+      // explanations are shown (read-only).
+      setQuizSubmitted(true)
+    }
 
     setLoading(false)
     setStartTime(new Date())
@@ -1764,8 +1810,9 @@ function ChallengePage() {
                 placeholder="Type your answer here..."
                 value={quizAnswer}
                 onChange={(e) => setQuizAnswer(e.target.value)}
-                disabled={completed || challengeFailed}
+                disabled={completed || challengeFailed || reviewMode}
               />
+              {!reviewMode && (
               <button
                 onClick={() => {
                   if (!quizAnswer.trim()) {
@@ -1790,6 +1837,7 @@ function ChallengePage() {
                   'Submit Answer'
                 )}
               </button>
+              )}
             </div>
           )}
         </div>
@@ -1875,9 +1923,11 @@ function ChallengePage() {
                 options={{
                   ...monacoEditorOptions,
                   tabSize: 2,
+                  readOnly: reviewMode,
                 }}
               />
             </div>
+            {!reviewMode && (
             <button
               onClick={() => handleSubmitCode(debugCode, challenge.solution, challenge.id)}
               disabled={isEvaluating || checking || challengeFailed || completed}
@@ -1894,6 +1944,7 @@ function ChallengePage() {
                 'Submit Fix'
               )}
             </button>
+            )}
           </div>
         </div>
       )
@@ -1974,9 +2025,11 @@ function ChallengePage() {
               options={{
                 ...monacoEditorOptions,
                 tabSize: 2,
+                readOnly: reviewMode,
               }}
             />
           </div>
+          {!reviewMode && (
           <button
             onClick={() => handleSubmitCode(userCode, challenge.solution, challenge.id)}
             disabled={isEvaluating || checking || challengeFailed}
@@ -1998,6 +2051,7 @@ function ChallengePage() {
               'Submit Solution'
             )}
           </button>
+          )}
           
           {/* Evaluation Result Display */}
           {evaluationResult && (
@@ -2101,22 +2155,6 @@ function ChallengePage() {
           {/* Challenge Info Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-6">
-              {/* Challenge Header */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-gray-800 p-6 rounded-lg"
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-3 h-3 bg-[#DCC5B2] rounded-full"></div>
-                  <span className="text-[#DCC5B2] text-sm uppercase tracking-wide">
-                    {challenge.challengeType}
-                  </span>
-                </div>
-                <h1 className="text-2xl font-bold mb-2">{challenge.title}</h1>
-                <p className="text-gray-400 text-sm">{challenge.description}</p>
-              </motion.div>
-
               {/* Challenge Details */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -2203,38 +2241,51 @@ function ChallengePage() {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-6"
             >
+              {reviewMode && (
+                <div className="bg-[#DCC5B2]/15 border border-[#DCC5B2]/40 text-[#DCC5B2] rounded-lg px-4 py-3 text-sm flex items-center gap-2">
+                  <CheckCircle size={16} />
+                  Review mode — viewing your submitted answer and the solution. Use “Redo / Retake” on the dashboard to attempt it fresh.
+                </div>
+              )}
               {renderChallengeContent()}
 
               {/* Hints */}
               {showHints && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="bg-blue-900 p-6 rounded-lg relative"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden"
                 >
-                  {/* Header with Auto-close Indicator */}
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-blue-200">💡 Hints</h3>
-                    <div className="flex items-center gap-2 text-blue-300 text-sm">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                      <span>Auto-closes in 20s</span>
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-gray-700 bg-gray-800/80">
+                    <h3 className="text-base font-semibold text-white flex items-center gap-2">
+                      <HelpCircle size={18} className="text-[#DCC5B2]" />
+                      Hints
+                    </h3>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gray-400 tabular-nums">closes in {hintSecondsLeft}s</span>
+                      <button
+                        onClick={handleHideHints}
+                        className="text-gray-400 hover:text-white transition-colors"
+                        aria-label="Close hints"
+                      >
+                        <X size={18} />
+                      </button>
                     </div>
                   </div>
 
-                  {/* Close Button */}
-                  <button
-                    onClick={handleHideHints}
-                    className="absolute top-4 right-4 text-blue-300 hover:text-blue-100 transition-colors p-1 rounded-full hover:bg-blue-800"
-                  >
-                    <div className="w-5 h-5 flex items-center justify-center">✕</div>
-                  </button>
+                  {/* Live countdown bar */}
+                  <div className="h-1 bg-gray-700">
+                    <div
+                      className="h-full bg-[#DCC5B2] transition-all duration-1000 ease-linear"
+                      style={{ width: `${(hintSecondsLeft / 20) * 100}%` }}
+                    />
+                  </div>
 
-                  {/* Hints List */}
-                  <ul className="space-y-2">
+                  <ul className="p-5 space-y-3">
                     {challenge.hints.map((hint, index) => (
-                      <li key={index} className="text-blue-100 flex items-start gap-2">
-                        <span className="text-blue-300">{index + 1}.</span>
-                        {hint}
+                      <li key={index} className="text-gray-200 text-sm flex items-start gap-3">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#DCC5B2]/20 text-[#DCC5B2] text-xs flex items-center justify-center font-semibold">{index + 1}</span>
+                        <span className="leading-relaxed">{hint}</span>
                       </li>
                     ))}
                   </ul>

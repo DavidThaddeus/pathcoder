@@ -78,6 +78,8 @@ function DashboardPage() {
   const [showTooManyChallengesModal, setShowTooManyChallengesModal] = useState(false)
   // Points/coins, profile, leaderboard, and the Clear All confirmation
   const [points, setPoints] = useState<number>(0)
+  const [completedCount, setCompletedCount] = useState<number>(0)
+  const [failedCount, setFailedCount] = useState<number>(0)
   const [displayName, setDisplayName] = useState("")
   const [techRole, setTechRole] = useState("")
   const [savingProfile, setSavingProfile] = useState(false)
@@ -414,12 +416,15 @@ function DashboardPage() {
         })
       })
 
-      // Remove from both ongoing and available (projects) lists, and clear localStorage
+      // Remove from ongoing, available (projects), AND completed/failed history.
       setOngoingChallenges(prevOngoing =>
         prevOngoing.filter(ch => ch.challenge_id !== challengeToDelete)
       )
       setProjects(prevProjects =>
         prevProjects.filter(p => p.id !== challengeToDelete)
+      )
+      setChallengeHistory(prevHistory =>
+        prevHistory.filter(ch => ch.challenge_id !== challengeToDelete)
       )
 
       // Clear the challenge status, data, and saved code from localStorage
@@ -429,6 +434,7 @@ function DashboardPage() {
       localStorage.removeItem(`challenge_code_${userKey}_${challengeToDelete}`)
       localStorage.removeItem(`challenge_debugcode_${userKey}_${challengeToDelete}`)
       localStorage.removeItem(`challenge_quizanswer_${userKey}_${challengeToDelete}`)
+      localStorage.removeItem(`challenge_quizsel_${userKey}_${challengeToDelete}`)
       
       // Close modal
       setShowDeleteModal(false)
@@ -706,6 +712,8 @@ function DashboardPage() {
       const data = await res.json()
       if (data.profile) {
         setPoints(data.profile.points ?? 0)
+        setCompletedCount(data.profile.completed_count ?? 0)
+        setFailedCount(data.profile.failed_count ?? 0)
         setDisplayName(data.profile.display_name || '')
         setTechRole(data.profile.tech_role || '')
       }
@@ -905,11 +913,15 @@ function DashboardPage() {
       const available = allChallenges.filter((ch: ChallengeHistory) => ch.status === 'available')
       const history = allChallenges.filter((ch: ChallengeHistory) => ch.status === 'completed' || ch.status === 'failed')
       
-      // Merge with existing local state to avoid overriding immediate UI changes
+      // IDs that have moved to completed/failed — they must NOT remain in the
+      // ongoing or available lists (that was the "In Progress" stuck-count bug).
+      const doneIds = new Set(history.map((ch: ChallengeHistory) => ch.challenge_id))
+
+      // Merge ongoing with local state, then drop any that are now done.
       setOngoingChallenges(prevOngoing => {
         const existingIds = new Set(prevOngoing.map((ch: ChallengeHistory) => ch.challenge_id))
         const newOngoing = ongoing.filter((ch: ChallengeHistory) => !existingIds.has(ch.challenge_id))
-        return [...prevOngoing, ...newOngoing]
+        return [...prevOngoing, ...newOngoing].filter((ch: ChallengeHistory) => !doneIds.has(ch.challenge_id))
       })
       setChallengeHistory(history)
       
@@ -935,7 +947,8 @@ function DashboardPage() {
             merged.push(newProject)
           }
         })
-        return merged
+        // Drop any available cards that are now completed/failed.
+        return merged.filter((p) => !doneIds.has(p.id))
       })
     } catch (e) {
       console.error('Error fetching challenge history:', e)
@@ -1255,10 +1268,17 @@ function DashboardPage() {
                             <Button
                               variant="outline"
                               size="sm"
+                              onClick={() => router.push(`/challenge/${challenge.challenge_id}?review=1`)}
+                            >
+                              View Answers
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => handleReattemptChallenge(challenge)}
                             >
                               {isCompleted ? 'Redo' : 'Retake'}
-                              <ChevronRight className="h-4 w-4 ml-1" />
+                              <RotateCcw className="h-4 w-4 ml-1" />
                             </Button>
                             <Button
                               variant="outline"
@@ -1293,11 +1313,11 @@ function DashboardPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-foreground/70">Challenges Completed</span>
-                  <span className="font-semibold text-green-500">{challengeHistory.filter(ch => ch.status === 'completed').length}</span>
+                  <span className="font-semibold text-green-500">{completedCount}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-foreground/70">Challenges Failed</span>
-                  <span className="font-semibold text-red-500">{challengeHistory.filter(ch => ch.status === 'failed').length}</span>
+                  <span className="font-semibold text-red-500">{failedCount}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-foreground/70">In Progress</span>
@@ -1305,25 +1325,10 @@ function DashboardPage() {
                 </div>
               </div>
             </div>
-
-            {/* Quick Actions */}
-            <div className="bg-background border border-border rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setShowProfile(true)}>
-                  <Award className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => { fetchLeaderboard(); setShowLeaderboard(true) }}>
-                  <Trophy className="h-4 w-4 mr-2" />
-                  View Leaderboard
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
-      
+
       {/* Preloader */}
       <Preloader 
         isVisible={showPreloader} 

@@ -180,7 +180,8 @@ INSTRUCTIONS FORMATTING:
         if (isQuiz) {
           return Array.isArray(parsed.questions) && parsed.questions.length >= 1
         }
-        return true
+        // Coding/debug must include a non-empty solution so "Show Solution" works.
+        return typeof parsed.solution === 'string' && parsed.solution.trim().length > 0
       },
     })
 

@@ -55,6 +55,8 @@ function ensureSchema(): Promise<void> {
         `ALTER TABLE users ADD COLUMN display_name TEXT`,
         `ALTER TABLE users ADD COLUMN tech_role TEXT`,
         `ALTER TABLE users ADD COLUMN points INTEGER NOT NULL DEFAULT 10`,
+        `ALTER TABLE users ADD COLUMN completed_count INTEGER NOT NULL DEFAULT 0`,
+        `ALTER TABLE users ADD COLUMN failed_count INTEGER NOT NULL DEFAULT 0`,
       ]) {
         try {
           await db.execute(stmt)
@@ -76,6 +78,8 @@ export interface UserRow {
   display_name: string | null
   tech_role: string | null
   points: number
+  completed_count: number
+  failed_count: number
 }
 
 export async function findUserByEmail(email: string): Promise<UserRow | undefined> {
@@ -214,6 +218,22 @@ export async function upsertChallenge(params: UpsertChallengeParams): Promise<vo
     const pts = computeChallengePoints(challengeDataJson)
     await addPoints(params.user_id, pts)
   }
+
+  // Cumulative lifetime counters: bump on each TRANSITION into completed/failed
+  // (a retake re-transitions and counts again). These only ever go up; the
+  // dashboard's "In Progress" is derived live from current statuses instead.
+  if (params.status === 'completed' && existing?.status !== 'completed') {
+    await db.execute({
+      sql: 'UPDATE users SET completed_count = completed_count + 1 WHERE id = ?',
+      args: [params.user_id],
+    })
+  }
+  if (params.status === 'failed' && existing?.status !== 'failed') {
+    await db.execute({
+      sql: 'UPDATE users SET failed_count = failed_count + 1 WHERE id = ?',
+      args: [params.user_id],
+    })
+  }
 }
 
 // Points for a passed challenge: coding/debug = 10; quiz scales by question
@@ -274,6 +294,8 @@ export interface PublicProfile {
   display_name: string | null
   tech_role: string | null
   points: number
+  completed_count: number
+  failed_count: number
 }
 
 export async function getProfile(id: string): Promise<PublicProfile | undefined> {
@@ -286,6 +308,8 @@ export async function getProfile(id: string): Promise<PublicProfile | undefined>
     display_name: row.display_name,
     tech_role: row.tech_role,
     points: row.points ?? 0,
+    completed_count: row.completed_count ?? 0,
+    failed_count: row.failed_count ?? 0,
   }
 }
 
