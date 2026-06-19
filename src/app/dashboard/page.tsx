@@ -18,7 +18,13 @@ import {
   Sparkles,
   ArrowLeft,
   X,
-  Bug
+  Bug,
+  Star,
+  Award,
+  CheckCircle,
+  XCircle,
+  RotateCcw,
+  Medal
 } from "lucide-react"
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -70,7 +76,16 @@ function DashboardPage() {
   const [showGenerateNewModal, setShowGenerateNewModal] = useState(false)
   const [challengeToGenerateNew, setChallengeToGenerateNew] = useState<string | null>(null)
   const [showTooManyChallengesModal, setShowTooManyChallengesModal] = useState(false)
-  
+  // Points/coins, profile, leaderboard, and the Clear All confirmation
+  const [points, setPoints] = useState<number>(0)
+  const [displayName, setDisplayName] = useState("")
+  const [techRole, setTechRole] = useState("")
+  const [savingProfile, setSavingProfile] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [leaderboard, setLeaderboard] = useState<{ id: string; name: string; tech_role: string | null; points: number }[]>([])
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+
   // Step 1: Language/Framework selection
   const [selectedLanguage, setSelectedLanguage] = useState("")
   const [customLanguage, setCustomLanguage] = useState("")
@@ -681,7 +696,86 @@ function DashboardPage() {
     </div>
   )
 
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
+
+  // Load the user's points/profile and the leaderboard.
+  const fetchProfile = async () => {
+    if (!user) return
+    try {
+      const res = await fetch(`/api/profile?user_id=${user.id}`)
+      const data = await res.json()
+      if (data.profile) {
+        setPoints(data.profile.points ?? 0)
+        setDisplayName(data.profile.display_name || '')
+        setTechRole(data.profile.tech_role || '')
+      }
+    } catch (e) {
+      console.error('Failed to load profile:', e)
+    }
+  }
+
+  const fetchLeaderboard = async () => {
+    try {
+      const res = await fetch('/api/leaderboard')
+      const data = await res.json()
+      setLeaderboard(data.leaderboard || [])
+    } catch (e) {
+      console.error('Failed to load leaderboard:', e)
+    }
+  }
+
+  const saveProfile = async () => {
+    if (!user) return
+    setSavingProfile(true)
+    try {
+      await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, displayName, techRole }),
+      })
+      setShowProfile(false)
+    } catch (e) {
+      console.error('Failed to save profile:', e)
+    } finally {
+      setSavingProfile(false)
+    }
+  }
+
+  // Clear ALL challenges (server + local). Used by the confirmation modal.
+  const doClearAll = async () => {
+    const userKey = user?.id || "demo-user"
+    if (user?.id) {
+      try {
+        await fetch('/api/challenge-history', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: user.id, challenge_id: 'all' }),
+        })
+      } catch (e) {
+        console.error('Failed to clear challenges on server:', e)
+      }
+    }
+    setProjects([])
+    setOngoingChallenges([])
+    setChallengeHistory([])
+    localStorage.removeItem(`projects_${userKey}`)
+    const keysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && (
+        key.startsWith(`challenge_${userKey}_`) ||
+        key.startsWith(`challenge_status_${userKey}_`) ||
+        key.startsWith(`challenge_code_${userKey}_`) ||
+        key.startsWith(`challenge_debugcode_${userKey}_`) ||
+        key.startsWith(`challenge_quizanswer_${userKey}_`) ||
+        key.startsWith(`challenge_quizsel_${userKey}_`)
+      )) {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key))
+    setShowClearConfirm(false)
+  }
   // Removed loadingHistory state since we load challenges immediately from localStorage
 
   useEffect(() => {
@@ -854,68 +948,43 @@ function DashboardPage() {
 
   // Load completed/failed (and reconcile ongoing/available) from the server on mount.
   useEffect(() => {
-    if (user) fetchChallengeHistory()
+    if (user) {
+      fetchChallengeHistory()
+      fetchProfile()
+      fetchLeaderboard()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-background/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center space-x-4">
               <Code2 className="h-8 w-8 text-primary" />
               <h1 className="text-2xl font-bold text-foreground">PathCoder Dashboard</h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm" onClick={fetchChallengeHistory}>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              {/* Points / coins balance */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30">
+                <Star className="h-4 w-4 text-primary" />
+                <span className="font-semibold text-foreground">{points}</span>
+                <span className="text-xs text-foreground/60 hidden sm:inline">pts</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => { fetchLeaderboard(); setShowLeaderboard(true) }}>
                 <Trophy className="h-4 w-4 mr-2" />
-                Sync with Server
+                Leaderboard
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={async () => {
-                  const userKey = user?.id || "demo-user"
-                  // Delete from the database first so they don't reappear on reload.
-                  if (user?.id) {
-                    try {
-                      await fetch('/api/challenge-history', {
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: user.id, challenge_id: 'all' }),
-                      })
-                    } catch (e) {
-                      console.error('Failed to clear challenges on server:', e)
-                    }
-                  }
-                  setProjects([])
-                  setOngoingChallenges([])
-                  setChallengeHistory([])
-                  localStorage.removeItem(`projects_${userKey}`)
-                  // Clear every per-challenge localStorage key for this user.
-                  const keysToRemove: string[] = []
-                  for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i)
-                    if (key && (
-                      key.startsWith(`challenge_${userKey}_`) ||
-                      key.startsWith(`challenge_status_${userKey}_`) ||
-                      key.startsWith(`challenge_code_${userKey}_`) ||
-                      key.startsWith(`challenge_debugcode_${userKey}_`) ||
-                      key.startsWith(`challenge_quizanswer_${userKey}_`) ||
-                      key.startsWith(`challenge_quizsel_${userKey}_`)
-                    )) {
-                      keysToRemove.push(key)
-                    }
-                  }
-                  keysToRemove.forEach(key => localStorage.removeItem(key))
-                }}
-              >
+              <Button variant="ghost" size="sm" onClick={() => setShowProfile(true)}>
+                Profile
+              </Button>
+              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600" onClick={() => setShowClearConfirm(true)}>
                 Clear All
               </Button>
-              <Button variant="ghost" size="sm">
-                Profile
+              <Button variant="ghost" size="sm" onClick={async () => { await signOut(); router.push('/login') }}>
+                Logout
               </Button>
             </div>
           </div>
@@ -1219,16 +1288,20 @@ function DashboardPage() {
               <h3 className="text-lg font-semibold text-foreground mb-4">Your Progress</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
+                  <span className="text-foreground/70 flex items-center gap-1.5"><Star className="h-4 w-4 text-primary" /> Points</span>
+                  <span className="font-semibold text-foreground">{points}</span>
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-foreground/70">Challenges Completed</span>
-                  <span className="font-semibold text-foreground">{challengeHistory.filter(ch => ch.status === 'completed').length}</span>
+                  <span className="font-semibold text-green-500">{challengeHistory.filter(ch => ch.status === 'completed').length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-foreground/70">Current Streak</span>
-                  <span className="font-semibold text-foreground">0 days</span>
+                  <span className="text-foreground/70">Challenges Failed</span>
+                  <span className="font-semibold text-red-500">{challengeHistory.filter(ch => ch.status === 'failed').length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-foreground/70">Topics Mastered</span>
-                  <span className="font-semibold text-foreground">0</span>
+                  <span className="text-foreground/70">In Progress</span>
+                  <span className="font-semibold text-foreground">{ongoingChallenges.length}</span>
                 </div>
               </div>
             </div>
@@ -1237,15 +1310,11 @@ function DashboardPage() {
             <div className="bg-background border border-border rounded-lg p-6">
               <h3 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
               <div className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Learning Goal
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => setShowProfile(true)}>
+                  <Award className="h-4 w-4 mr-2" />
+                  Edit Profile
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Browse Solutions
-                </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => { fetchLeaderboard(); setShowLeaderboard(true) }}>
                   <Trophy className="h-4 w-4 mr-2" />
                   View Leaderboard
                 </Button>
@@ -1379,6 +1448,101 @@ function DashboardPage() {
               >
                 Got It
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Profile / Settings Modal */}
+      {showProfile && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" onClick={() => setShowProfile(false)}>
+          <div className="bg-background border border-border rounded-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-2"><Award className="h-5 w-5 text-primary" /> Profile</h3>
+              <button onClick={() => setShowProfile(false)} className="text-foreground/60 hover:text-foreground"><X className="h-5 w-5" /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-foreground/70 mb-1">Account email</label>
+                <p className="text-foreground/90 text-sm bg-muted/40 rounded px-3 py-2">{user?.email}</p>
+              </div>
+              <div>
+                <label className="block text-sm text-foreground/70 mb-1">Display name (shown on the leaderboard)</label>
+                <input
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="e.g. CodeNinja"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-foreground/70 mb-1">Tech role</label>
+                <select
+                  value={techRole}
+                  onChange={(e) => setTechRole(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select a role…</option>
+                  <option value="Frontend">Frontend</option>
+                  <option value="Backend">Backend</option>
+                  <option value="Fullstack">Fullstack</option>
+                  <option value="Mobile">Mobile</option>
+                  <option value="DevOps">DevOps</option>
+                  <option value="Data/ML">Data / ML</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" size="sm" onClick={() => setShowProfile(false)}>Cancel</Button>
+              <Button size="sm" onClick={saveProfile} disabled={savingProfile}>{savingProfile ? 'Saving…' : 'Save'}</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard Modal */}
+      {showLeaderboard && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" onClick={() => setShowLeaderboard(false)}>
+          <div className="bg-background border border-border rounded-xl p-6 w-full max-w-lg max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-2"><Trophy className="h-5 w-5 text-primary" /> Leaderboard</h3>
+              <button onClick={() => setShowLeaderboard(false)} className="text-foreground/60 hover:text-foreground"><X className="h-5 w-5" /></button>
+            </div>
+            {leaderboard.length === 0 ? (
+              <p className="text-foreground/60 text-center py-8">No players yet. Be the first to earn points!</p>
+            ) : (
+              <div className="space-y-1">
+                {leaderboard.map((entry, i) => (
+                  <div key={entry.id} className={`flex items-center justify-between px-3 py-2 rounded-lg ${entry.id === user?.id ? 'bg-primary/15 border border-primary/40' : 'hover:bg-muted/40'}`}>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className={`w-6 text-center font-bold ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-gray-300' : i === 2 ? 'text-amber-600' : 'text-foreground/50'}`}>
+                        {i < 3 ? <Medal className="h-4 w-4 inline" /> : i + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-foreground font-medium truncate">{entry.name}{entry.id === user?.id ? ' (you)' : ''}</p>
+                        {entry.tech_role && <p className="text-xs text-foreground/50">{entry.tech_role}</p>}
+                      </div>
+                    </div>
+                    <span className="font-semibold text-primary flex items-center gap-1"><Star className="h-3.5 w-3.5" />{entry.points}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Clear All Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" onClick={() => setShowClearConfirm(false)}>
+          <div className="bg-background border border-red-500/40 rounded-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2"><XCircle className="h-5 w-5 text-red-500" /> Clear all challenges?</h3>
+            <p className="text-foreground/70 text-sm mb-6">
+              This permanently deletes <strong>all</strong> your challenges — available, in-progress, completed, and failed — from your account. Your points are not affected. This cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowClearConfirm(false)}>Cancel</Button>
+              <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white" onClick={doClearAll}>Yes, clear everything</Button>
             </div>
           </div>
         </div>

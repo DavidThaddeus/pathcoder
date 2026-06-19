@@ -49,6 +49,19 @@ function ensureSchema(): Promise<void> {
           UNIQUE(user_id, challenge_id)
         )
       `)
+      // Migrations: add profile/points columns to existing user tables.
+      // ADD COLUMN errors with "duplicate column name" if already present — ignore.
+      for (const stmt of [
+        `ALTER TABLE users ADD COLUMN display_name TEXT`,
+        `ALTER TABLE users ADD COLUMN tech_role TEXT`,
+        `ALTER TABLE users ADD COLUMN points INTEGER NOT NULL DEFAULT 10`,
+      ]) {
+        try {
+          await db.execute(stmt)
+        } catch {
+          /* column already exists */
+        }
+      }
     })()
   }
   return schemaReady
@@ -60,6 +73,9 @@ export interface UserRow {
   full_name: string | null
   password_hash: string
   created_at: string
+  display_name: string | null
+  tech_role: string | null
+  points: number
 }
 
 export async function findUserByEmail(email: string): Promise<UserRow | undefined> {
@@ -191,6 +207,32 @@ export async function upsertChallenge(params: UpsertChallengeParams): Promise<vo
       ],
     })
   }
+
+  // Award points the FIRST time a challenge becomes completed (idempotent —
+  // safe across both /complete-challenge and /challenge-history calls).
+  if (params.status === 'completed' && existing?.status !== 'completed') {
+    const pts = computeChallengePoints(challengeDataJson)
+    await addPoints(params.user_id, pts)
+  }
+}
+
+// Points for a passed challenge: coding/debug = 10; quiz scales by question
+// count (5–9 → 3, 10–15 → 5, 16–20 → 10).
+function computeChallengePoints(challengeDataJson: string | null): number {
+  try {
+    if (!challengeDataJson) return 10
+    const data = JSON.parse(challengeDataJson)
+    const type = String(data.challengeType || data.type || '').toLowerCase()
+    if (type === 'quiz') {
+      const n = Array.isArray(data.questions) ? data.questions.length : 5
+      if (n >= 16) return 10
+      if (n >= 10) return 5
+      return 3
+    }
+    return 10
+  } catch {
+    return 10
+  }
 }
 
 export async function listChallenges(
@@ -221,4 +263,87 @@ export async function deleteChallenge(user_id: string, challenge_id: string): Pr
 export async function deleteAllChallenges(user_id: string): Promise<void> {
   await ensureSchema()
   await db.execute({ sql: 'DELETE FROM challenges WHERE user_id = ?', args: [user_id] })
+}
+
+// ---- Profile / points (coins) / leaderboard ----
+
+export interface PublicProfile {
+  id: string
+  email: string
+  full_name: string | null
+  display_name: string | null
+  tech_role: string | null
+  points: number
+}
+
+export async function getProfile(id: string): Promise<PublicProfile | undefined> {
+  const row = await findUserById(id)
+  if (!row) return undefined
+  return {
+    id: row.id,
+    email: row.email,
+    full_name: row.full_name,
+    display_name: row.display_name,
+    tech_role: row.tech_role,
+    points: row.points ?? 0,
+  }
+}
+
+export async function updateProfile(
+  id: string,
+  params: { displayName?: string; techRole?: string }
+): Promise<void> {
+  await ensureSchema()
+  await db.execute({
+    sql: `UPDATE users SET
+            display_name = COALESCE(?, display_name),
+            tech_role = COALESCE(?, tech_role)
+          WHERE id = ?`,
+    args: [params.displayName ?? null, params.techRole ?? null, id],
+  })
+}
+
+// Add (or subtract) points/coins. Returns the new balance.
+export async function addPoints(id: string, delta: number): Promise<number> {
+  await ensureSchema()
+  await db.execute({
+    sql: 'UPDATE users SET points = points + ? WHERE id = ?',
+    args: [delta, id],
+  })
+  const row = await findUserById(id)
+  return row?.points ?? 0
+}
+
+// Spend coins atomically. Returns the new balance, or null if insufficient.
+export async function spendCoins(id: string, amount: number): Promise<number | null> {
+  await ensureSchema()
+  const res = await db.execute({
+    sql: 'UPDATE users SET points = points - ? WHERE id = ? AND points >= ?',
+    args: [amount, id, amount],
+  })
+  if (res.rowsAffected === 0) return null // insufficient balance
+  const row = await findUserById(id)
+  return row?.points ?? 0
+}
+
+export interface LeaderboardEntry {
+  id: string
+  name: string
+  tech_role: string | null
+  points: number
+}
+
+export async function getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
+  await ensureSchema()
+  const res = await db.execute({
+    sql: `SELECT id, display_name, full_name, email, tech_role, points
+          FROM users ORDER BY points DESC, created_at ASC LIMIT ?`,
+    args: [limit],
+  })
+  return res.rows.map((r: any) => ({
+    id: r.id,
+    name: r.display_name || r.full_name || (r.email ? String(r.email).split('@')[0] : 'Anonymous'),
+    tech_role: r.tech_role ?? null,
+    points: r.points ?? 0,
+  }))
 }

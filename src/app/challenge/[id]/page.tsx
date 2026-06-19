@@ -1496,19 +1496,47 @@ function ChallengePage() {
   }
 
   // Function to handle hints with auto-close
-  function handleShowHints() {
+  async function handleShowHints() {
+    if (!user) return
+
+    // Each hint reveal costs 2 coins (deducted from the user's points balance).
+    try {
+      const res = await fetch('/api/spend-coins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, amount: 2 }),
+      })
+      if (res.status === 402) {
+        setResultMessage('💰 Not enough coins for a hint (each hint costs 2). Complete challenges to earn more coins!')
+        setResultType('error')
+        setShowResultModal(true)
+        return
+      }
+      if (!res.ok) {
+        setResultMessage('Could not use a hint right now. Please try again.')
+        setResultType('error')
+        setShowResultModal(true)
+        return
+      }
+    } catch {
+      setResultMessage('Could not use a hint right now. Please check your connection and try again.')
+      setResultType('error')
+      setShowResultModal(true)
+      return
+    }
+
     setShowHints(true)
-    
+
     // Clear any existing timeout
     if (hintTimeout) {
       clearTimeout(hintTimeout)
     }
-    
-    // Set auto-close after 15 seconds
+
+    // Set auto-close after 20 seconds
     const timeout = setTimeout(() => {
       setShowHints(false)
-    }, 15000)
-    
+    }, 20000)
+
     setHintTimeout(timeout)
   }
 
@@ -2155,7 +2183,7 @@ function ChallengePage() {
                   className="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg transition-colors"
                 >
                   <HelpCircle size={16} />
-                  {showHints ? 'Hide Hints' : 'Show Hints'}
+                  {showHints ? 'Hide Hints' : 'Show Hints (−2 coins)'}
                 </button>
                 <button
                   onClick={handleShowSolution}
@@ -2189,7 +2217,7 @@ function ChallengePage() {
                     <h3 className="text-lg font-semibold text-blue-200">💡 Hints</h3>
                     <div className="flex items-center gap-2 text-blue-300 text-sm">
                       <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                      <span>Auto-closes in 15s</span>
+                      <span>Auto-closes in 20s</span>
                     </div>
                   </div>
 
