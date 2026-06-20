@@ -652,33 +652,33 @@ function ChallengePage() {
     const sanitizedStarter = formattedStarterCode
 
     return (
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-lg border border-gray-700 shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Code className="text-red-400" size={18} />
-            <span className="text-white text-lg font-semibold">Starter Code</span>
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-6 rounded-lg border border-gray-700 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+            <Code className="text-red-400 shrink-0" size={18} />
+            <span className="text-white text-base sm:text-lg font-semibold">Starter Code</span>
             <span className="text-gray-400 text-sm">({getLanguageDisplayName(language)})</span>
           </div>
           <button
             onClick={() => copyToClipboard(formattedStarterCode || sanitizedStarter, 'starter-code')}
-            className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-md text-sm transition-colors border border-gray-600"
+            className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-md text-sm transition-colors border border-gray-600 cursor-pointer shrink-0"
           >
             {copiedItems['starter-code'] ? (
               <>
                 <Check size={14} />
-                Copied!
+                <span className="hidden sm:inline">Copied!</span>
               </>
             ) : (
               <>
                 <Copy size={14} />
-                Copy Code
+                <span className="hidden sm:inline">Copy Code</span>
               </>
             )}
           </button>
         </div>
-        <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden shadow-inner">
+        <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden shadow-inner h-[220px] sm:h-[260px] md:h-[300px]">
           <Editor
-            height="300px"
+            height="100%"
             language={normalizedLang}
             theme="vs-dark"
             value={formattedStarterCode}
@@ -769,7 +769,7 @@ function ChallengePage() {
 
     if (!codeToShow && !solutionExplanation) {
       return (
-        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 text-gray-300">
+        <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border border-gray-700 text-gray-300">
           No solution was provided for this challenge.
         </div>
       )
@@ -782,11 +782,11 @@ function ChallengePage() {
 
     const normalizedLang = normalizeLanguage(programmingLang)
     return (
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-lg border border-gray-700 shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Code className="text-green-400" size={18} />
-            <span className="text-white text-lg font-semibold">Solution</span>
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-6 rounded-lg border border-gray-700 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+            <Code className="text-green-400 shrink-0" size={18} />
+            <span className="text-white text-base sm:text-lg font-semibold">Solution</span>
             <span className="text-gray-400 text-sm">({getLanguageDisplayName(programmingLang)})</span>
           </div>
           <button
@@ -795,33 +795,33 @@ function ChallengePage() {
                 copyToClipboard(formattedCode, 'solution-code')
               }
             }}
-            className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-md text-sm transition-colors border border-gray-600"
+            className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-md text-sm transition-colors border border-gray-600 cursor-pointer shrink-0"
           >
             {copiedItems['solution-code'] ? (
               <>
                 <Check size={14} />
-                Copied!
+                <span className="hidden sm:inline">Copied!</span>
               </>
             ) : (
               <>
                 <Copy size={14} />
-                Copy Code
+                <span className="hidden sm:inline">Copy Code</span>
               </>
             )}
           </button>
         </div>
         {solutionExplanation && (
-          <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-600">
+          <div className="mt-4 p-3 sm:p-4 bg-gray-800 rounded-lg border border-gray-600">
             <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-              <HelpCircle className="text-blue-400" size={16} />
+              <HelpCircle className="text-blue-400 shrink-0" size={16} />
               Solution Explanation
             </h4>
-            <div className="text-gray-200 leading-relaxed">
-              <ReactMarkdown 
+            <div className="text-gray-200 leading-relaxed text-sm sm:text-base break-words">
+              <ReactMarkdown
                 components={{
-                  h1: ({children}) => <h1 className="text-2xl font-bold text-white mb-4">{children}</h1>,
-                  h2: ({children}) => <h2 className="text-xl font-bold text-white mb-3">{children}</h2>,
-                  h3: ({children}) => <h3 className="text-lg font-bold text-white mb-2">{children}</h3>,
+                  h1: ({children}) => <h1 className="text-xl sm:text-2xl font-bold text-white mb-4">{children}</h1>,
+                  h2: ({children}) => <h2 className="text-lg sm:text-xl font-bold text-white mb-3">{children}</h2>,
+                  h3: ({children}) => <h3 className="text-base sm:text-lg font-bold text-white mb-2">{children}</h3>,
                   strong: ({children}) => <strong className="text-white font-semibold">{children}</strong>,
                   code: ({children}) => <code className="bg-gray-700 px-2 py-1 rounded text-sm font-mono text-yellow-300">{children}</code>,
                   ol: ({children}) => <ol className="list-decimal list-inside space-y-2 mb-4">{children}</ol>,
@@ -835,9 +835,9 @@ function ChallengePage() {
             </div>
           </div>
         )}
-        <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden shadow-inner">
+        <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden shadow-inner mt-4 h-[280px] sm:h-[340px] md:h-[400px]">
           <Editor
-            height="400px"
+            height="100%"
             language={normalizedLang}
             theme="vs-dark"
             value={codeToShow}
@@ -1703,24 +1703,24 @@ function ChallengePage() {
 
     if (challenge.challengeType === 'quiz') {
       return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Challenge Title */}
-          <div className="bg-gradient-to-r from-[#DCC5B2] to-[#B8A082] p-6 rounded-lg">
-            <h2 className="text-2xl font-bold text-black mb-2">
+          <div className="bg-gradient-to-r from-[#DCC5B2] to-[#B8A082] p-4 sm:p-6 rounded-lg">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-black mb-2 break-words">
               📋 {challenge.title}
             </h2>
-            <p className="text-black/80 text-lg">
+            <p className="text-black/80 text-sm sm:text-base lg:text-lg">
               {challenge.description}
             </p>
           </div>
 
           {/* Instructions */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 shadow-2xl">
-            <h3 className="text-3xl text-white mb-8 flex items-center gap-4 font-bold">
-              <HelpCircle className="text-[#DCC5B2]" size={32} />
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-700 shadow-2xl">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl text-white mb-4 sm:mb-6 lg:mb-8 flex items-center gap-2 sm:gap-3 lg:gap-4 font-bold">
+              <HelpCircle className="text-[#DCC5B2] shrink-0" size={28} />
               Challenge Instructions
             </h3>
-            <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-700 min-h-[200px] max-h-none overflow-auto shadow-inner">
+            <div className="bg-gradient-to-br from-gray-900 to-black p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-700 min-h-[200px] max-h-none overflow-auto shadow-inner">
               <div className="text-gray-200 leading-relaxed break-words">
                 <ReactMarkdown components={markdownComponents}>
                   {cleanMarkdown(instructions)}
@@ -1731,9 +1731,9 @@ function ChallengePage() {
 
           {/* Code Snippet (only if necessary) */}
           {codeSnippet && codeSnippet.trim() && (
-            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-              <h3 className="text-lg text-white mb-4 flex items-center gap-2">
-                <Code className="text-[#DCC5B2]" size={16} />
+            <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border border-gray-700">
+              <h3 className="text-base sm:text-lg text-white mb-4 flex items-center gap-2">
+                <Code className="text-[#DCC5B2] shrink-0" size={16} />
                 Starter Code
               </h3>
               <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden">
@@ -1744,9 +1744,9 @@ function ChallengePage() {
 
           {/* Structured multiple-choice quiz */}
           {challenge.questions && challenge.questions.length > 0 ? (
-            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg text-white">Questions ({challenge.questions.length})</h3>
+            <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border border-gray-700 space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="text-base sm:text-lg text-white">Questions ({challenge.questions.length})</h3>
                 {quizResult && (
                   <span className={`text-sm font-semibold px-3 py-1 rounded ${quizResult.passed ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                     Score: {quizResult.score}/{quizResult.total}
@@ -1758,7 +1758,7 @@ function ChallengePage() {
                 const selected = quizSelections[qi]
                 return (
                   <div key={qi} className="border-b border-gray-700 pb-5 last:border-0">
-                    <p className="text-white font-medium mb-3">{qi + 1}. {q.question}</p>
+                    <p className="text-white font-medium mb-3 break-words">{qi + 1}. {q.question}</p>
                     <div className="space-y-2">
                       {q.options.map((opt, oi) => {
                         const isSelected = selected === oi
@@ -1777,7 +1777,7 @@ function ChallengePage() {
                             type="button"
                             disabled={quizSubmitted || completed || challengeFailed}
                             onClick={() => setQuizSelections((prev) => ({ ...prev, [qi]: oi }))}
-                            className={`w-full text-left px-4 py-2.5 rounded-lg border transition-colors disabled:cursor-not-allowed ${style}`}
+                            className={`w-full text-left px-3 sm:px-4 py-2.5 rounded-lg border transition-colors disabled:cursor-not-allowed cursor-pointer text-sm sm:text-base break-words ${style}`}
                           >
                             <span className="font-mono mr-2">{String.fromCharCode(65 + oi)}.</span>
                             {opt}
@@ -1791,7 +1791,7 @@ function ChallengePage() {
                           {selected === q.correctIndex ? '✓ Correct' : '✗ Incorrect'}
                         </span>
                         <span className="text-gray-400"> — correct answer: {String.fromCharCode(65 + q.correctIndex)}</span>
-                        <p className="text-gray-300 mt-1"><span className="text-[#DCC5B2] font-medium">Explanation:</span> {q.explanation}</p>
+                        <p className="text-gray-300 mt-1 break-words"><span className="text-[#DCC5B2] font-medium">Explanation:</span> {q.explanation}</p>
                       </div>
                     )}
                   </div>
@@ -1801,7 +1801,7 @@ function ChallengePage() {
               {!quizSubmitted && !completed && !challengeFailed && (
                 <button
                   onClick={handleQuizSubmit}
-                  className="bg-[#DCC5B2] text-black px-6 py-2 rounded-lg hover:bg-opacity-80 transition-colors font-medium"
+                  className="w-full sm:w-auto bg-[#DCC5B2] text-black px-6 py-2.5 sm:py-2 rounded-lg hover:bg-opacity-80 transition-colors font-medium cursor-pointer"
                 >
                   Submit Quiz
                 </button>
@@ -1809,10 +1809,10 @@ function ChallengePage() {
             </div>
           ) : (
             /* Fallback: free-text answer (older quizzes without structured questions) */
-            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-              <h3 className="text-lg text-white mb-4">Your Answer</h3>
+            <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border border-gray-700">
+              <h3 className="text-base sm:text-lg text-white mb-4">Your Answer</h3>
               <textarea
-                className="w-full h-32 bg-gray-900 text-white p-4 rounded border border-gray-600 focus:border-[#DCC5B2] outline-none resize-none disabled:opacity-50"
+                className="w-full h-32 bg-gray-900 text-white p-4 rounded border border-gray-600 focus:border-[#DCC5B2] outline-none resize-none disabled:opacity-50 text-sm sm:text-base"
                 placeholder="Type your answer here..."
                 value={quizAnswer}
                 onChange={(e) => setQuizAnswer(e.target.value)}
@@ -1830,7 +1830,7 @@ function ChallengePage() {
                   handleSubmitCode(quizAnswer, challenge.solution, challenge.id)
                 }}
                 disabled={isEvaluating || checking || challengeFailed || completed}
-                className="mt-4 bg-[#DCC5B2] text-black px-6 py-2 rounded-lg hover:bg-opacity-80 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="mt-4 w-full sm:w-auto bg-[#DCC5B2] text-black px-6 py-2.5 sm:py-2 rounded-lg hover:bg-opacity-80 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isEvaluating || checking ? (
                   <>
@@ -1852,22 +1852,22 @@ function ChallengePage() {
 
     if (challenge.challengeType === 'debug') {
       return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Challenge Title */}
-          <div className="bg-gradient-to-r from-[#DCC5B2] to-[#B8A082] p-6 rounded-lg">
-            <h2 className="text-2xl font-bold text-black mb-2">
+          <div className="bg-gradient-to-r from-[#DCC5B2] to-[#B8A082] p-4 sm:p-6 rounded-lg">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-black mb-2 break-words">
               🐛 {challenge.title}
             </h2>
-            <p className="text-black/80 text-lg">
+            <p className="text-black/80 text-sm sm:text-base lg:text-lg">
               {challenge.description}
             </p>
           </div>
 
           {/* Code with Bugs — shown FIRST for debug challenges */}
           {codeSnippet && codeSnippet.trim() ? (
-            <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-              <h3 className="text-lg text-white mb-4 flex items-center gap-2">
-                <Code className="text-red-400" size={16} />
+            <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border border-gray-700">
+              <h3 className="text-base sm:text-lg text-white mb-4 flex items-center gap-2">
+                <Code className="text-red-400 shrink-0" size={16} />
                 Code with Bugs
               </h3>
               <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden">
@@ -1875,18 +1875,18 @@ function ChallengePage() {
               </div>
             </div>
           ) : (
-            <div className="bg-gray-800 p-6 rounded-lg border border-yellow-700/50 text-yellow-300/80 text-sm">
+            <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border border-yellow-700/50 text-yellow-300/80 text-sm">
               No buggy code was provided for this challenge. Use the instructions below and write your corrected solution.
             </div>
           )}
 
           {/* Instructions — shown after the buggy code */}
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 shadow-2xl">
-            <h3 className="text-3xl text-white mb-8 flex items-center gap-4 font-bold">
-              <Target className="text-[#DCC5B2]" size={32} />
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-700 shadow-2xl">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl text-white mb-4 sm:mb-6 lg:mb-8 flex items-center gap-2 sm:gap-3 lg:gap-4 font-bold">
+              <Target className="text-[#DCC5B2] shrink-0" size={28} />
               Debug Instructions
             </h3>
-            <div className="bg-gradient-to-br from-gray-900 to-black p-8 rounded-xl border border-gray-700 min-h-[200px] max-h-none overflow-auto shadow-inner">
+            <div className="bg-gradient-to-br from-gray-900 to-black p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-700 min-h-[200px] max-h-none overflow-auto shadow-inner">
               <div className="text-gray-200 leading-relaxed break-words">
                 <ReactMarkdown components={markdownComponents}>
                   {cleanMarkdown(instructions)}
@@ -1896,32 +1896,32 @@ function ChallengePage() {
           </div>
 
           {/* Fixed Code Editor */}
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Code className="text-green-400" size={16} />
-                <span className="text-white text-lg">Your Fixed Code</span>
+          <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border border-gray-700">
+            <div className="flex items-center justify-between mb-4 gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <Code className="text-green-400 shrink-0" size={16} />
+                <span className="text-white text-base sm:text-lg truncate">Your Fixed Code</span>
               </div>
               <button
                 onClick={() => copyToClipboard(debugCode, 'debug-code')}
-                className="flex items-center gap-2 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-sm transition-colors"
+                className="flex items-center gap-2 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-sm transition-colors cursor-pointer shrink-0"
               >
                 {copiedItems['debug-code'] ? (
                   <>
                     <Check size={14} />
-                    Copied!
+                    <span className="hidden sm:inline">Copied!</span>
                   </>
                 ) : (
                   <>
                     <Copy size={14} />
-                    Copy
+                    <span className="hidden sm:inline">Copy</span>
                   </>
                 )}
               </button>
             </div>
-            <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden">
+            <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden h-[260px] sm:h-[300px]">
               <Editor
-                height="300px"
+                height="100%"
                 language={normalizeLanguage(challenge.programmingLanguage?.toLowerCase() || challenge.programmingLanguage || 'javascript')}
                 theme="vs-dark"
                 value={debugCode}
@@ -1937,7 +1937,7 @@ function ChallengePage() {
             <button
               onClick={() => handleSubmitCode(debugCode, challenge.solution, challenge.id)}
               disabled={isEvaluating || checking || challengeFailed || completed}
-              className="mt-4 bg-[#DCC5B2] text-black px-6 py-2 rounded-lg hover:bg-opacity-80 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="mt-4 w-full sm:w-auto bg-[#DCC5B2] text-black px-6 py-2.5 sm:py-2 rounded-lg hover:bg-opacity-80 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {isEvaluating || checking ? (
                 <>
@@ -1958,24 +1958,24 @@ function ChallengePage() {
 
     // Default coding challenge
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Challenge Title */}
-        <div className="bg-gradient-to-r from-[#DCC5B2] to-[#B8A082] p-6 rounded-lg">
-          <h2 className="text-2xl font-bold text-black mb-2">
+        <div className="bg-gradient-to-r from-[#DCC5B2] to-[#B8A082] p-4 sm:p-6 rounded-lg">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-black mb-2 break-words">
             💻 {challenge.title}
           </h2>
-          <p className="text-black/80 text-lg">
+          <p className="text-black/80 text-sm sm:text-base lg:text-lg">
             {challenge.description}
           </p>
         </div>
 
         {/* Instructions */}
-        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-          <h3 className="text-2xl text-white mb-6 flex items-center gap-3 font-semibold">
-            <Target className="text-[#DCC5B2]" size={24} />
+        <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border border-gray-700">
+          <h3 className="text-lg sm:text-xl lg:text-2xl text-white mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3 font-semibold">
+            <Target className="text-[#DCC5B2] shrink-0" size={22} />
             Challenge Instructions
           </h3>
-          <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 min-h-[120px] max-h-none overflow-auto">
+          <div className="bg-gray-900 p-4 sm:p-6 rounded-lg border border-gray-700 min-h-[120px] max-h-none overflow-auto">
             <div className="text-gray-200 leading-relaxed break-words">
               <ReactMarkdown components={markdownComponents}>
                 {cleanMarkdown(instructions)}
@@ -1986,9 +1986,9 @@ function ChallengePage() {
 
         {/* Starter Code (if any) */}
         {codeSnippet && (
-          <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <h3 className="text-lg text-white mb-4 flex items-center gap-2">
-              <Code className="text-[#DCC5B2]" size={16} />
+          <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border border-gray-700">
+            <h3 className="text-base sm:text-lg text-white mb-4 flex items-center gap-2">
+              <Code className="text-[#DCC5B2] shrink-0" size={16} />
               Starter Code
             </h3>
             <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden">
@@ -1998,32 +1998,32 @@ function ChallengePage() {
         )}
 
         {/* Code Editor */}
-        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Code className="text-green-400" size={16} />
-              <span className="text-white text-lg">Your Solution</span>
+        <div className="bg-gray-800 p-4 sm:p-6 rounded-lg border border-gray-700">
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Code className="text-green-400 shrink-0" size={16} />
+              <span className="text-white text-base sm:text-lg truncate">Your Solution</span>
             </div>
             <button
               onClick={() => copyToClipboard(userCode, 'user-code')}
-              className="flex items-center gap-2 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-sm transition-colors"
+              className="flex items-center gap-2 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded text-sm transition-colors cursor-pointer shrink-0"
             >
               {copiedItems['user-code'] ? (
                 <>
                   <Check size={14} />
-                  Copied!
+                  <span className="hidden sm:inline">Copied!</span>
                 </>
               ) : (
                 <>
                   <Copy size={14} />
-                  Copy
+                  <span className="hidden sm:inline">Copy</span>
                 </>
               )}
             </button>
           </div>
-          <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden">
+          <div className="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden h-[320px] sm:h-[380px] md:h-[400px]">
             <Editor
-              height="400px"
+              height="100%"
               language={normalizeLanguage(challenge.programmingLanguage?.toLowerCase() || challenge.programmingLanguage || 'javascript')}
               theme="vs-dark"
               value={userCode}
@@ -2039,7 +2039,7 @@ function ChallengePage() {
           <button
             onClick={() => handleSubmitCode(userCode, challenge.solution, challenge.id)}
             disabled={isEvaluating || checking || challengeFailed}
-            className="mt-4 bg-[#DCC5B2] text-black px-6 py-2 rounded-lg hover:bg-opacity-80 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="mt-4 w-full sm:w-auto bg-[#DCC5B2] text-black px-6 py-2.5 sm:py-2 rounded-lg hover:bg-opacity-80 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
           >
             {isEvaluating ? (
               <>
@@ -2058,28 +2058,28 @@ function ChallengePage() {
             )}
           </button>
           )}
-          
+
           {/* Evaluation Result Display */}
           {evaluationResult && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`mt-4 p-6 rounded-lg border-2 relative ${
-                evaluationResult.result === 'PASS' 
-                  ? 'bg-gray-800 border-[#DCC5B2] text-white' 
+              className={`mt-4 p-4 sm:p-6 rounded-lg border-2 relative ${
+                evaluationResult.result === 'PASS'
+                  ? 'bg-gray-800 border-[#DCC5B2] text-white'
                   : 'bg-gray-800 border-red-500 text-white'
               }`}
             >
               {/* Close Button */}
               <button
                 onClick={() => setEvaluationResult(null)}
-                className="absolute top-3 right-3 text-gray-400 hover:text-[#DCC5B2] transition-colors p-1 rounded-full hover:bg-gray-700"
+                className="absolute top-3 right-3 text-gray-400 hover:text-[#DCC5B2] transition-colors p-1 rounded-full hover:bg-gray-700 cursor-pointer"
               >
                 <div className="w-5 h-5 flex items-center justify-center">✕</div>
               </button>
 
               {/* Header */}
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-4 pr-8">
                 {evaluationResult.result === 'PASS' ? (
                   <div className="w-10 h-10 bg-gradient-to-br from-[#DCC5B2] to-[#B8A082] rounded-full flex items-center justify-center">
                     <CheckCircle size={24} className="text-black" />
@@ -2131,42 +2131,44 @@ function ChallengePage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <div className="bg-gray-900 border-b border-gray-800">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+      {/* Header — fixed so it stays visible while scrolling the challenge */}
+      <div className="sticky top-0 z-40 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-3">
             <button
               onClick={() => router.push('/dashboard')}
-              className="flex items-center gap-2 text-[#DCC5B2] hover:text-white transition-colors"
+              className="flex items-center gap-1.5 sm:gap-2 text-[#DCC5B2] hover:text-white transition-colors cursor-pointer shrink-0"
             >
               <ArrowLeft size={20} />
-              Back to Dashboard
+              <span className="hidden sm:inline">Back to Dashboard</span>
+              <span className="sm:hidden text-sm">Back</span>
             </button>
             {completed && (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="flex items-center gap-2 bg-green-600 px-4 py-2 rounded-lg"
+                className="flex items-center gap-1.5 sm:gap-2 bg-green-600 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm whitespace-nowrap"
               >
-                <CheckCircle size={20} />
-                Challenge Completed!
+                <CheckCircle size={18} className="shrink-0" />
+                <span className="hidden sm:inline">Challenge Completed!</span>
+                <span className="sm:hidden">Done!</span>
               </motion.div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Challenge Info Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+          {/* Challenge Info Sidebar — shown after the main content on mobile */}
+          <div className="lg:col-span-1 order-2 lg:order-1">
+            <div className="lg:sticky lg:top-24 space-y-6">
               {/* Challenge Details */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-gray-800 p-6 rounded-lg space-y-4"
+                className="bg-gray-800 p-4 sm:p-6 rounded-lg space-y-4"
               >
                 <div className="flex items-center gap-3">
                   <Clock size={16} className="text-[#DCC5B2]" />
@@ -2187,7 +2189,7 @@ function ChallengePage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-gray-800 p-6 rounded-lg"
+                className="bg-gray-800 p-4 sm:p-6 rounded-lg"
               >
                 <h3 className="text-lg font-semibold mb-3">Topics Covered</h3>
                 <div className="flex flex-wrap gap-2">
@@ -2207,7 +2209,7 @@ function ChallengePage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-gray-800 p-6 rounded-lg"
+                className="bg-gray-800 p-4 sm:p-6 rounded-lg"
               >
                 <h3 className="text-lg font-semibold mb-3">Learning Objectives</h3>
                 <ul className="space-y-2">
@@ -2224,16 +2226,16 @@ function ChallengePage() {
               <div className="space-y-3">
                 <button
                   onClick={showHints ? handleHideHints : handleShowHints}
-                  className="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg transition-colors"
+                  className="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg transition-colors cursor-pointer text-sm sm:text-base"
                 >
-                  <HelpCircle size={16} />
+                  <HelpCircle size={16} className="shrink-0" />
                   {showHints ? 'Hide Hints' : 'Show Hints (−2 coins)'}
                 </button>
                 <button
                   onClick={handleShowSolution}
-                  className="w-full flex items-center justify-center gap-2 bg-[#DCC5B2] text-black hover:bg-opacity-80 px-4 py-3 rounded-lg transition-colors"
+                  className="w-full flex items-center justify-center gap-2 bg-[#DCC5B2] text-black hover:bg-opacity-80 px-4 py-3 rounded-lg transition-colors cursor-pointer text-sm sm:text-base"
                 >
-                  <Code size={16} />
+                  <Code size={16} className="shrink-0" />
                   Show Solution
                 </button>
               </div>
@@ -2241,7 +2243,7 @@ function ChallengePage() {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 order-1 lg:order-2 min-w-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2249,7 +2251,7 @@ function ChallengePage() {
             >
               {reviewMode && (
                 <div className="bg-[#DCC5B2]/15 border border-[#DCC5B2]/40 text-[#DCC5B2] rounded-lg px-4 py-3 text-sm flex items-center gap-2">
-                  <CheckCircle size={16} />
+                  <CheckCircle size={16} className="shrink-0" />
                   Review mode — viewing your submitted answer and the solution. Use “Redo / Retake” on the dashboard to attempt it fresh.
                 </div>
               )}
@@ -2262,16 +2264,16 @@ function ChallengePage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden"
                 >
-                  <div className="flex items-center justify-between px-5 py-3 border-b border-gray-700 bg-gray-800/80">
-                    <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                      <HelpCircle size={18} className="text-[#DCC5B2]" />
+                  <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-gray-700 bg-gray-800/80 gap-2">
+                    <h3 className="text-sm sm:text-base font-semibold text-white flex items-center gap-2 min-w-0">
+                      <HelpCircle size={18} className="text-[#DCC5B2] shrink-0" />
                       Hints
                     </h3>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                       <span className="text-xs text-gray-400 tabular-nums">closes in {hintSecondsLeft}s</span>
                       <button
                         onClick={handleHideHints}
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="text-gray-400 hover:text-white transition-colors cursor-pointer"
                         aria-label="Close hints"
                       >
                         <X size={18} />
@@ -2287,11 +2289,11 @@ function ChallengePage() {
                     />
                   </div>
 
-                  <ul className="p-5 space-y-3">
+                  <ul className="p-4 sm:p-5 space-y-3">
                     {challenge.hints.map((hint, index) => (
                       <li key={index} className="text-gray-200 text-sm flex items-start gap-3">
                         <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#DCC5B2]/20 text-[#DCC5B2] text-xs flex items-center justify-center font-semibold">{index + 1}</span>
-                        <span className="leading-relaxed">{hint}</span>
+                        <span className="leading-relaxed break-words">{hint}</span>
                       </li>
                     ))}
                   </ul>
@@ -2305,10 +2307,10 @@ function ChallengePage() {
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  className="bg-green-900 p-6 rounded-lg border border-green-700"
+                  className="bg-green-900 p-4 sm:p-6 rounded-lg border border-green-700"
                 >
-                  <h3 className="text-xl font-semibold mb-6 text-green-200 flex items-center gap-3">
-                    <CheckCircle size={24} />
+                  <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-green-200 flex items-center gap-2 sm:gap-3">
+                    <CheckCircle size={22} className="shrink-0" />
                     ✅ Complete Solution
                   </h3>
                   <div className="space-y-6">
@@ -2324,33 +2326,33 @@ function ChallengePage() {
       {/* Modal for solution reveal confirmation */}
       {showSolutionModal && (
         <Modal onClose={cancelShowSolution}>
-          <div className="p-6 text-center max-w-md mx-auto">
+          <div className="p-4 sm:p-6 text-center max-w-md mx-auto">
             {/* Warning Icon */}
-            <div className="w-16 h-16 bg-gradient-to-br from-[#DCC5B2] to-[#B8A082] rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-[#DCC5B2] to-[#B8A082] rounded-full flex items-center justify-center mx-auto mb-4">
               <div className="text-2xl">⚠️</div>
             </div>
 
             {/* Title */}
-            <h2 className="text-2xl font-bold mb-4 text-white">Are you sure?</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-white">Are you sure?</h2>
 
             {/* Warning Message */}
             <div className="mb-6 p-4 bg-gray-700 border border-[#DCC5B2] rounded-lg">
               <p className="text-sm leading-relaxed text-gray-300">
-                If you check the solution, you will automatically lose the challenge. 
+                If you check the solution, you will automatically lose the challenge.
                 <strong className="text-[#DCC5B2]"> Try harder before revealing the answer!</strong>
               </p>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 justify-center">
-              <button 
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                className="w-full sm:w-auto px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors cursor-pointer"
                 onClick={confirmShowSolution}
               >
                 Show Solution
               </button>
-              <button 
-                className="px-6 py-3 bg-[#DCC5B2] hover:bg-[#B8A082] text-black rounded-lg font-medium transition-colors"
+              <button
+                className="w-full sm:w-auto px-6 py-3 bg-[#DCC5B2] hover:bg-[#B8A082] text-black rounded-lg font-medium transition-colors cursor-pointer"
                 onClick={cancelShowSolution}
               >
                 Cancel
@@ -2363,30 +2365,30 @@ function ChallengePage() {
       {/* Add Modal for result */}
       {showResultModal && (
         <Modal onClose={() => setShowResultModal(false)}>
-          <div className="p-6 text-center max-w-md mx-auto">
+          <div className="p-4 sm:p-6 text-center max-w-md mx-auto">
             {/* Icon and Title */}
             <div className="mb-4">
               {resultType === 'success' ? (
-                <div className="w-16 h-16 bg-gradient-to-br from-[#DCC5B2] to-[#B8A082] rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-[#DCC5B2] to-[#B8A082] rounded-full flex items-center justify-center mx-auto mb-3">
                   <CheckCircle size={32} className="text-black" />
                 </div>
               ) : (
-                <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-3">
                   <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 </div>
               )}
-              <h2 className={`text-2xl font-bold ${resultType === 'success' ? 'text-[#DCC5B2]' : 'text-red-400'}`}>
+              <h2 className={`text-xl sm:text-2xl font-bold ${resultType === 'success' ? 'text-[#DCC5B2]' : 'text-red-400'}`}>
                 {resultType === 'success' ? '🎉 Success!' : '❌ Try Again'}
               </h2>
             </div>
 
             {/* Message */}
             <div className={`mb-6 p-4 rounded-lg ${
-              resultType === 'success' 
-                ? 'bg-gray-700 border border-[#DCC5B2]' 
+              resultType === 'success'
+                ? 'bg-gray-700 border border-[#DCC5B2]'
                 : 'bg-gray-700 border border-red-500'
             }`}>
-              <p className={`text-sm leading-relaxed ${
+              <p className={`text-sm leading-relaxed break-words ${
                 resultType === 'success' ? 'text-gray-300' : 'text-gray-300'
               }`}>
                 {resultMessage}
@@ -2398,8 +2400,8 @@ function ChallengePage() {
               <div className="space-y-3">
                 <p className="text-sm text-gray-400 mb-4">What would you like to do next?</p>
                 <div className="flex flex-col gap-2">
-                  <button 
-                    className="px-6 py-3 bg-[#DCC5B2] hover:bg-[#B8A082] text-black rounded-lg font-medium transition-colors"
+                  <button
+                    className="px-6 py-3 bg-[#DCC5B2] hover:bg-[#B8A082] text-black rounded-lg font-medium transition-colors cursor-pointer"
                     onClick={() => {
                       setShowResultModal(false)
                       router.push('/dashboard')
@@ -2407,8 +2409,8 @@ function ChallengePage() {
                   >
                     🏠 Back to Dashboard
                   </button>
-                  <button 
-                    className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                  <button
+                    className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors cursor-pointer"
                     onClick={() => setShowResultModal(false)}
                   >
                     📝 Stay in Challenge
@@ -2419,8 +2421,8 @@ function ChallengePage() {
               <div className="space-y-3">
                 <p className="text-sm text-gray-400 mb-4">What would you like to do next?</p>
                 <div className="flex flex-col gap-2">
-                  <button 
-                    className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                  <button
+                    className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors cursor-pointer"
                     onClick={() => {
                       setShowResultModal(false)
                       router.push('/dashboard')
@@ -2428,8 +2430,8 @@ function ChallengePage() {
                   >
                     🏠 Back to Dashboard
                   </button>
-                  <button 
-                    className="px-6 py-3 bg-[#DCC5B2] hover:bg-[#B8A082] text-black rounded-lg font-medium transition-colors"
+                  <button
+                    className="px-6 py-3 bg-[#DCC5B2] hover:bg-[#B8A082] text-black rounded-lg font-medium transition-colors cursor-pointer"
                     onClick={() => setShowResultModal(false)}
                   >
                     📝 Stay and Review Solution
@@ -2437,8 +2439,8 @@ function ChallengePage() {
                 </div>
               </div>
             ) : (
-              <button 
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+              <button
+                className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors cursor-pointer"
                 onClick={() => setShowResultModal(false)}
               >
                 OK

@@ -490,24 +490,24 @@ function DashboardPage() {
   }
 
   const renderStep1 = () => (
-    <div className="bg-background border border-border rounded-lg p-6 mb-8">
+    <div className="bg-background border border-border rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
       <div className="flex items-center mb-6">
-        <Sparkles className="h-6 w-6 text-primary mr-2" />
-        <h2 className="text-2xl font-bold text-foreground">Choose Your Language/Framework</h2>
+        <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-primary mr-2 shrink-0" />
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">Choose Your Language/Framework</h2>
       </div>
 
       <div className="mb-6">
-        <p className="text-foreground/70 mb-4">
+        <p className="text-foreground/70 mb-4 text-sm sm:text-base">
           What programming language or framework are you currently learning?
         </p>
-        
+
         {/* Popular Languages Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 mb-6">
           {popularLanguages.map((lang) => (
             <button
               key={lang.name}
               onClick={() => selectLanguage(lang.name)}
-              className={`p-3 text-sm rounded-lg border transition-colors ${
+              className={`p-2.5 sm:p-3 text-sm rounded-lg border transition-colors cursor-pointer ${
                 selectedLanguage === lang.name
                   ? 'bg-primary text-black border-primary'
                   : 'bg-background text-foreground border-border hover:border-primary'
@@ -550,11 +550,11 @@ function DashboardPage() {
   )
 
   const renderStep2 = () => (
-    <div className="bg-background border border-border rounded-lg p-6 mb-8">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <Target className="h-6 w-6 text-primary mr-2" />
-          <h2 className="text-2xl font-bold text-foreground">Configure Your Challenge</h2>
+    <div className="bg-background border border-border rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="flex items-center min-w-0">
+          <Target className="h-5 w-5 sm:h-6 sm:w-6 text-primary mr-2 shrink-0" />
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">Configure Your Challenge</h2>
         </div>
         <Button variant="ghost" size="sm" onClick={handleBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -617,7 +617,7 @@ function DashboardPage() {
             <button
               key={level}
               onClick={() => setSkillLevel(level)}
-              className={`p-3 text-sm rounded-lg border transition-colors capitalize ${
+              className={`p-2.5 sm:p-3 text-xs sm:text-sm rounded-lg border transition-colors capitalize cursor-pointer ${
                 skillLevel === level
                   ? 'bg-primary text-black border-primary'
                   : 'bg-background text-foreground border-border hover:border-primary'
@@ -973,28 +973,32 @@ function DashboardPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Code2 className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">PathCoder Dashboard</h1>
+        <div className="container mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap min-h-16 py-2 items-center justify-between gap-x-3 gap-y-2">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+              <Code2 className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />
+              <h1 className="text-base sm:text-xl lg:text-2xl font-bold text-foreground truncate">
+                <span className="sm:hidden">PathCoder</span>
+                <span className="hidden sm:inline">PathCoder Dashboard</span>
+              </h1>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
               {/* Points / coins balance */}
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30">
+              <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30">
                 <Star className="h-4 w-4 text-primary" />
-                <span className="font-semibold text-foreground">{points}</span>
+                <span className="font-semibold text-foreground text-sm sm:text-base">{points}</span>
                 <span className="text-xs text-foreground/60 hidden sm:inline">pts</span>
               </div>
               <Button variant="outline" size="sm" onClick={() => { fetchLeaderboard(); setShowLeaderboard(true) }}>
-                <Trophy className="h-4 w-4 mr-2" />
-                Leaderboard
+                <Trophy className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Leaderboard</span>
               </Button>
               <Button variant="ghost" size="sm" onClick={() => setShowProfile(true)}>
                 Profile
               </Button>
               <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600" onClick={() => setShowClearConfirm(true)}>
-                Clear All
+                <span className="hidden sm:inline">Clear All</span>
+                <span className="sm:hidden">Clear</span>
               </Button>
               <Button variant="ghost" size="sm" onClick={async () => { await signOut(); router.push('/login') }}>
                 Logout
@@ -1004,11 +1008,11 @@ function DashboardPage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+
           {/* Challenge Generator */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 min-w-0">
             {/* Step Indicator */}
             <div className="flex items-center mb-6">
               <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
@@ -1031,8 +1035,8 @@ function DashboardPage() {
 
             {/* All Challenges */}
             <div className="space-y-4">
-              <h3 className="text-xl font-bold text-foreground flex items-center">
-                <Target className="h-5 w-5 mr-2" />
+              <h3 className="text-lg sm:text-xl font-bold text-foreground flex items-center">
+                <Target className="h-5 w-5 mr-2 shrink-0" />
                 Your Challenges
               </h3>
               
@@ -1048,15 +1052,15 @@ function DashboardPage() {
                   {ongoingChallenges
                     .filter((challenge) => !challengeHistory.some((h) => h.challenge_id === challenge.challenge_id))
                     .map((challenge) => (
-                    <div key={challenge.id} className="bg-background border border-primary/30 rounded-lg p-6 hover:border-primary transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <h4 className="text-lg font-semibold text-foreground">{challenge.title}</h4>
-                            <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Ongoing</span>
+                    <div key={challenge.id} className="bg-background border border-primary/30 rounded-lg p-4 sm:p-6 hover:border-primary transition-colors">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <div className="w-2 h-2 bg-green-500 rounded-full shrink-0"></div>
+                            <h4 className="text-base sm:text-lg font-semibold text-foreground break-words">{challenge.title}</h4>
+                            <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded shrink-0">Ongoing</span>
                           </div>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-foreground/60 mb-4">
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-foreground/60 mb-4">
                             <div className="flex items-center">
                               <Code2 className="h-4 w-4 mr-1" />
                               {challenge.programmingLanguage}
@@ -1071,10 +1075,10 @@ function DashboardPage() {
                             </div>
                           </div>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="outline" 
+
+                        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={async () => {
                               // Try to find challenge data from projects first
@@ -1125,16 +1129,16 @@ function DashboardPage() {
                   {projects
                     .filter((project) => !challengeHistory.some((h) => h.challenge_id === project.id))
                     .map((project) => (
-                    <div key={project.id} className="bg-background border border-border rounded-lg p-6 hover:border-primary transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            <h4 className="text-lg font-semibold text-foreground">{project.title}</h4>
-                            <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Available</span>
+                    <div key={project.id} className="bg-background border border-border rounded-lg p-4 sm:p-6 hover:border-primary transition-colors">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full shrink-0"></div>
+                            <h4 className="text-base sm:text-lg font-semibold text-foreground break-words">{project.title}</h4>
+                            <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded shrink-0">Available</span>
                           </div>
-                          <p className="text-foreground/70 mb-4">{project.description}</p>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-foreground/60">
+                          <p className="text-foreground/70 mb-4 text-sm sm:text-base">{project.description}</p>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-foreground/60">
                             <div className="flex items-center">
                               <Target className="h-4 w-4 mr-1" />
                               {project.difficulty}
@@ -1150,8 +1154,8 @@ function DashboardPage() {
                             </div>
                           </div>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
+
+                        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                         <Button
                           variant="outline"
                           size="sm"
@@ -1229,26 +1233,26 @@ function DashboardPage() {
                     return (
                       <div
                         key={challenge.id}
-                        className={`bg-background border rounded-lg p-6 transition-colors ${
+                        className={`bg-background border rounded-lg p-4 sm:p-6 transition-colors ${
                           isCompleted ? 'border-green-500/40 hover:border-green-500' : 'border-red-500/40 hover:border-red-500'
                         }`}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
                               {isCompleted ? (
-                                <Trophy className="h-5 w-5 text-green-500" />
+                                <Trophy className="h-5 w-5 text-green-500 shrink-0" />
                               ) : (
-                                <X className="h-5 w-5 text-red-500" />
+                                <X className="h-5 w-5 text-red-500 shrink-0" />
                               )}
-                              <h4 className="text-lg font-semibold text-foreground">{challenge.title}</h4>
-                              <span className={`text-xs px-2 py-1 rounded ${
+                              <h4 className="text-base sm:text-lg font-semibold text-foreground break-words">{challenge.title}</h4>
+                              <span className={`text-xs px-2 py-1 rounded shrink-0 ${
                                 isCompleted ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                               }`}>
                                 {isCompleted ? 'Challenge Completed' : 'Challenge Failed'}
                               </span>
                             </div>
-                            <div className="flex flex-wrap items-center gap-4 text-sm text-foreground/60">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-foreground/60">
                               <div className="flex items-center">
                                 <Code2 className="h-4 w-4 mr-1" />
                                 {challenge.programmingLanguage}
@@ -1264,7 +1268,7 @@ function DashboardPage() {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                             <Button
                               variant="outline"
                               size="sm"
@@ -1302,9 +1306,9 @@ function DashboardPage() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
             {/* Stats */}
-            <div className="bg-background border border-border rounded-lg p-6">
+            <div className="bg-background border border-border rounded-lg p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-foreground mb-4">Your Progress</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -1338,7 +1342,7 @@ function DashboardPage() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-lg p-4 sm:p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
                 <X className="h-5 w-5 text-white" />
@@ -1353,7 +1357,7 @@ function DashboardPage() {
               Are you sure you want to delete this challenge from your history? This will permanently remove it from your records.
             </p>
             
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
               <Button 
                 variant="outline" 
                 onClick={cancelDelete}
@@ -1376,7 +1380,7 @@ function DashboardPage() {
       {/* Generate New Challenge Modal */}
       {showGenerateNewModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-lg p-4 sm:p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-white" />
@@ -1391,7 +1395,7 @@ function DashboardPage() {
               The challenge data for this ongoing challenge could not be found. Would you like to generate a new challenge? This will keep your existing challenges and add a new one.
             </p>
             
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
               <Button 
                 variant="outline" 
                 onClick={cancelGenerateNew}
@@ -1413,7 +1417,7 @@ function DashboardPage() {
       {/* Too Many Ongoing Challenges Modal */}
       {showTooManyChallengesModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-lg p-4 sm:p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-yellow-600 rounded-full flex items-center justify-center">
                 <Target className="h-5 w-5 text-white" />
@@ -1446,7 +1450,7 @@ function DashboardPage() {
               </div>
             </div>
             
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
               <Button 
                 onClick={() => setShowTooManyChallengesModal(false)}
                 className="px-4 bg-[#DCC5B2] hover:bg-[#B8A082] text-black"
@@ -1460,9 +1464,9 @@ function DashboardPage() {
       {/* Profile / Settings Modal */}
       {showProfile && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" onClick={() => setShowProfile(false)}>
-          <div className="bg-background border border-border rounded-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-background border border-border rounded-xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-foreground flex items-center gap-2"><Award className="h-5 w-5 text-primary" /> Profile</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2"><Award className="h-5 w-5 text-primary" /> Profile</h3>
               <button onClick={() => setShowProfile(false)} className="text-foreground/60 hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
             <div className="space-y-4">
@@ -1497,7 +1501,7 @@ function DashboardPage() {
                 </select>
               </div>
             </div>
-            <div className="flex justify-end gap-2 mt-6">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-6">
               <Button variant="outline" size="sm" onClick={() => setShowProfile(false)}>Cancel</Button>
               <Button size="sm" onClick={saveProfile} disabled={savingProfile}>{savingProfile ? 'Saving…' : 'Save'}</Button>
             </div>
@@ -1508,9 +1512,9 @@ function DashboardPage() {
       {/* Leaderboard Modal */}
       {showLeaderboard && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" onClick={() => setShowLeaderboard(false)}>
-          <div className="bg-background border border-border rounded-xl p-6 w-full max-w-lg max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-background border border-border rounded-xl p-4 sm:p-6 w-full max-w-lg max-h-[85vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-foreground flex items-center gap-2"><Trophy className="h-5 w-5 text-primary" /> Leaderboard</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2"><Trophy className="h-5 w-5 text-primary" /> Leaderboard</h3>
               <button onClick={() => setShowLeaderboard(false)} className="text-foreground/60 hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
             {leaderboard.length === 0 ? (
@@ -1540,12 +1544,12 @@ function DashboardPage() {
       {/* Clear All Confirmation Modal */}
       {showClearConfirm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" onClick={() => setShowClearConfirm(false)}>
-          <div className="bg-background border border-red-500/40 rounded-xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2"><XCircle className="h-5 w-5 text-red-500" /> Clear all challenges?</h3>
+          <div className="bg-background border border-red-500/40 rounded-xl p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 flex items-center gap-2"><XCircle className="h-5 w-5 text-red-500 shrink-0" /> Clear all challenges?</h3>
             <p className="text-foreground/70 text-sm mb-6">
               This permanently deletes <strong>all</strong> your challenges — available, in-progress, completed, and failed — from your account. Your points are not affected. This cannot be undone.
             </p>
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
               <Button variant="outline" size="sm" onClick={() => setShowClearConfirm(false)}>Cancel</Button>
               <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white" onClick={doClearAll}>Yes, clear everything</Button>
             </div>
