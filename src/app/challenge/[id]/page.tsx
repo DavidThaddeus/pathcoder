@@ -1498,7 +1498,13 @@ function ChallengePage() {
     setShowSolutionModal(false)
     setShowSolution(true)
     setChallengeFailed(true)
-    
+    // For quizzes, revealing the solution means showing each question's correct
+    // answer + explanation inline (the structured Q&A view already does this
+    // once "submitted" — there's no separate code solution to show).
+    if (challenge?.challengeType === 'quiz') {
+      setQuizSubmitted(true)
+    }
+
     // Mark challenge as failed in the database
     if (user && challenge) {
       fetch('/api/challenge-history', {
@@ -2292,8 +2298,10 @@ function ChallengePage() {
                 </motion.div>
               )}
 
-              {/* Solution */}
-              {showSolution && (
+              {/* Solution — quizzes reveal answers inline in the questions list
+                  above (via quizSubmitted), so this code-solution card is only
+                  relevant for coding/debug challenges. */}
+              {showSolution && challenge.challengeType !== 'quiz' && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}

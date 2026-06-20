@@ -212,23 +212,25 @@ export async function upsertChallenge(params: UpsertChallengeParams): Promise<vo
     })
   }
 
-  // Award points the FIRST time a challenge becomes completed (idempotent —
-  // safe across both /complete-challenge and /challenge-history calls).
-  if (params.status === 'completed' && existing?.status !== 'completed') {
+  // completed_at/failed_at are sticky (COALESCE preserves them through a retake
+  // reset to 'ongoing'), so their presence on the PRE-upsert row is a reliable
+  // "this challenge has already been resolved once before" signal — even
+  // across a retake where current `status` has gone back to 'ongoing'.
+  const alreadyResolved = !!(existing?.completed_at || existing?.failed_at)
+
+  // Award points and bump lifetime completed/failed counters ONLY the very
+  // first time a challenge resolves. Retaking (pass or fail) after that is
+  // practice only — it must never add points or count again, or repeated
+  // retakes would let a user farm points / inflate stats indefinitely.
+  if (params.status === 'completed' && existing?.status !== 'completed' && !alreadyResolved) {
     const pts = computeChallengePoints(challengeDataJson)
     await addPoints(params.user_id, pts)
-  }
-
-  // Cumulative lifetime counters: bump on each TRANSITION into completed/failed
-  // (a retake re-transitions and counts again). These only ever go up; the
-  // dashboard's "In Progress" is derived live from current statuses instead.
-  if (params.status === 'completed' && existing?.status !== 'completed') {
     await db.execute({
       sql: 'UPDATE users SET completed_count = completed_count + 1 WHERE id = ?',
       args: [params.user_id],
     })
   }
-  if (params.status === 'failed' && existing?.status !== 'failed') {
+  if (params.status === 'failed' && existing?.status !== 'failed' && !alreadyResolved) {
     await db.execute({
       sql: 'UPDATE users SET failed_count = failed_count + 1 WHERE id = ?',
       args: [params.user_id],
