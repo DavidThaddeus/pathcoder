@@ -11,47 +11,35 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-14 sm:h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <Code className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-foreground">PathCoder</span>
+          <Link href="/" className="flex items-center space-x-2 min-w-0 shrink-0">
+            <Code className="h-7 w-7 sm:h-8 sm:w-8 text-primary shrink-0" />
+            <span className="text-lg sm:text-xl font-bold text-foreground truncate">PathCoder</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link 
-              href="#features" 
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-            >
-              Features
-            </Link>
-            <Link 
-              href="#pricing" 
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-            >
-              Pricing
-            </Link>
-            <Link 
-              href="#how-it-works" 
+          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <Link
+              href="#how-it-works"
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
               How It Works
             </Link>
-            <Link 
-              href="/about" 
+            <Link
+              href="#pricing"
               className="text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
-              About
+              Pricing
             </Link>
           </nav>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" asChild>
+          <div className="hidden md:flex items-center space-x-3 lg:space-x-4 shrink-0">
+            <Button variant="ghost" size="sm" asChild>
               <Link href="/login">Sign In</Link>
             </Button>
-            <Button asChild>
+            <Button size="sm" asChild>
               <Link href="/signup">Get Started</Link>
             </Button>
           </div>
@@ -60,8 +48,9 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden shrink-0"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMobileMenuOpen ? (
               <X className="h-5 w-5" />
@@ -74,41 +63,27 @@ export function Header() {
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-border py-4">
-            <nav className="flex flex-col space-y-4">
-              <Link 
-                href="#features" 
-                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Features
-              </Link>
-              <Link 
-                href="#pricing" 
-                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Pricing
-              </Link>
-              <Link 
-                href="#how-it-works" 
-                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+            <nav className="flex flex-col space-y-1">
+              <Link
+                href="#how-it-works"
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors px-1 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 How It Works
               </Link>
-              <Link 
-                href="/about" 
-                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              <Link
+                href="#pricing"
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors px-1 py-2.5"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                About
+                Pricing
               </Link>
-              <div className="flex flex-col space-y-2 pt-4 border-t border-border">
-                <Button variant="ghost" asChild>
-                  <Link href="/login">Sign In</Link>
+              <div className="flex flex-col space-y-2 pt-3 mt-2 border-t border-border">
+                <Button variant="ghost" className="w-full justify-center" asChild>
+                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>Sign In</Link>
                 </Button>
-                <Button asChild>
-                  <Link href="/signup">Get Started</Link>
+                <Button className="w-full justify-center" asChild>
+                  <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>Get Started</Link>
                 </Button>
               </div>
             </nav>
@@ -117,4 +92,4 @@ export function Header() {
       </div>
     </header>
   )
-} 
+}

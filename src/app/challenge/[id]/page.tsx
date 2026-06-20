@@ -2163,40 +2163,19 @@ function ChallengePage() {
           {/* Challenge Info Sidebar — shown after the main content on mobile */}
           <div className="lg:col-span-1 order-2 lg:order-1">
             <div className="lg:sticky lg:top-24 space-y-6">
-              {/* Challenge Details */}
+              {/* Topics Covered */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-gray-800 p-4 sm:p-6 rounded-lg space-y-4"
-              >
-                <div className="flex items-center gap-3">
-                  <Clock size={16} className="text-[#DCC5B2]" />
-                  <span className="text-sm">{challenge.estimatedTime}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Target size={16} className="text-[#DCC5B2]" />
-                  <span className="text-sm capitalize">{challenge.skillLevel}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Code size={16} className="text-[#DCC5B2]" />
-                  <span className="text-sm">{challenge.programmingLanguage}</span>
-                </div>
-              </motion.div>
-
-              {/* Topics */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
                 className="bg-gray-800 p-4 sm:p-6 rounded-lg"
               >
-                <h3 className="text-lg font-semibold mb-3">Topics Covered</h3>
+                <h3 className="text-base sm:text-lg font-semibold mb-3">Topics Covered</h3>
                 <div className="flex flex-wrap gap-2">
                   {challenge.topics.map((topic, index) => (
                     <span
                       key={index}
-                      className="bg-[#DCC5B2] text-black px-3 py-1 rounded-full text-sm"
+                      className="bg-[#DCC5B2] text-black px-3 py-1 rounded-full text-xs sm:text-sm break-words"
                     >
                       {topic}
                     </span>
@@ -2208,18 +2187,40 @@ function ChallengePage() {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.2 }}
                 className="bg-gray-800 p-4 sm:p-6 rounded-lg"
               >
-                <h3 className="text-lg font-semibold mb-3">Learning Objectives</h3>
+                <h3 className="text-base sm:text-lg font-semibold mb-3">Learning Objectives</h3>
                 <ul className="space-y-2">
                   {challenge.learningObjectives.map((objective, index) => (
                     <li key={index} className="flex items-start gap-2 text-sm">
                       <Star size={12} className="text-[#DCC5B2] mt-1 flex-shrink-0" />
-                      {objective}
+                      <span className="break-words">{objective}</span>
                     </li>
                   ))}
                 </ul>
+              </motion.div>
+
+              {/* Challenge Details */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-gray-800 p-4 sm:p-6 rounded-lg space-y-3"
+              >
+                <h3 className="text-base sm:text-lg font-semibold mb-1">Challenge Details</h3>
+                <div className="flex items-center gap-3">
+                  <Clock size={16} className="text-[#DCC5B2] shrink-0" />
+                  <span className="text-sm">{challenge.estimatedTime}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Target size={16} className="text-[#DCC5B2] shrink-0" />
+                  <span className="text-sm capitalize">{challenge.skillLevel}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Code size={16} className="text-[#DCC5B2] shrink-0" />
+                  <span className="text-sm break-words">{challenge.programmingLanguage}</span>
+                </div>
               </motion.div>
 
               {/* Actions */}

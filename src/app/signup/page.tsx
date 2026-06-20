@@ -64,16 +64,16 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="text-center">
-          <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-            <Code className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">PathCoder</span>
+          <Link href="/" className="inline-flex items-center space-x-2 mb-6 sm:mb-8">
+            <Code className="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
+            <span className="text-xl sm:text-2xl font-bold text-foreground">PathCoder</span>
           </Link>
-          
-          <h2 className="text-3xl font-bold text-foreground">
+
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
             Create your account
           </h2>
           <p className="mt-2 text-sm text-foreground/70">
@@ -154,8 +154,9 @@ export default function SignUpPage() {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-foreground/40 hover:text-foreground"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black hover:opacity-70 transition-opacity cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -180,8 +181,9 @@ export default function SignUpPage() {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-foreground/40 hover:text-foreground"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black hover:opacity-70 transition-opacity cursor-pointer"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 >
                   {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
