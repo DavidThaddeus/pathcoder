@@ -1674,7 +1674,7 @@ function ChallengePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-dvh bg-black flex items-center justify-center">
         <div className="text-[#DCC5B2] text-xl">Loading challenge...</div>
       </div>
     )
@@ -1682,7 +1682,7 @@ function ChallengePage() {
 
   if (!challenge) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-dvh bg-black flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl text-white mb-4">Challenge not found</h1>
           <button
@@ -2130,7 +2130,7 @@ function ChallengePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-dvh bg-black text-white">
       {/* Header — fixed so it stays visible while scrolling the challenge */}
       <div className="sticky top-0 z-40 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800">
         <div className="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
@@ -2158,7 +2158,7 @@ function ChallengePage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 pt-5 sm:pt-8 pb-16 sm:pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
           {/* Challenge Info Sidebar — Topics, then Details, then Objectives,
               always before the main instructions/editor content. */}

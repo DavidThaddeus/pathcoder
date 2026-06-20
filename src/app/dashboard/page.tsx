@@ -974,7 +974,7 @@ function DashboardPage() {
   }, [user])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="container mx-auto px-3 sm:px-6 lg:px-8">
@@ -1048,11 +1048,11 @@ function DashboardPage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 pt-5 sm:pt-8 pb-16 sm:pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
 
           {/* Challenge Generator */}
-          <div className="lg:col-span-2 min-w-0">
+          <div className="lg:col-span-2 min-w-0 order-2 lg:order-1">
             {/* Step Indicator */}
             <div className="flex items-center mb-6">
               <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
@@ -1345,8 +1345,9 @@ function DashboardPage() {
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          {/* Sidebar — Your Progress shows first on mobile (above the
+              language/challenge generator), right column on desktop. */}
+          <div className="space-y-6 lg:sticky lg:top-24 lg:self-start order-1 lg:order-2">
             {/* Stats */}
             <div className="bg-background border border-border rounded-lg p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-foreground mb-4">Your Progress</h3>
