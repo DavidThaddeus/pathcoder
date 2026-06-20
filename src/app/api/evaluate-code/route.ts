@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { callAI } from '@/lib/ai'
 
 export const runtime = 'nodejs'
+// Same reasoning as generate-project: an AI fallback chain can legitimately
+// take 20-30s, which can exceed Vercel's account-level default function
+// timeout and truncate the response, breaking the client's response.json().
+export const maxDuration = 45
 
 export async function POST(request: NextRequest) {
   try {

@@ -33,6 +33,11 @@ interface CallParams {
   temperature?: number
   topP?: number
   timeoutMs?: number
+  // Hard ceiling on the WHOLE fallback chain (all models combined). Without
+  // this, a 5-model chain at timeoutMs each could run for minutes — far past
+  // Vercel's serverless function limit, which cuts the HTTP response off
+  // mid-stream and produces a client-side "Unexpected end of JSON input".
+  deadlineMs?: number
   // Ask providers that support it (Groq) to return strict JSON.
   jsonMode?: boolean
   // Optional gate: a model's output is only accepted when this returns true.
@@ -62,16 +67,25 @@ export async function callAI({
   maxTokens = 2048,
   temperature = 0.7,
   topP = 0.95,
-  timeoutMs = 30000,
+  timeoutMs = 15000,
+  deadlineMs = 40000,
   jsonMode = false,
   validate,
 }: CallParams): Promise<AIResult | null> {
+  const startedAt = Date.now()
   for (const entry of AI_MODELS) {
+    const remaining = deadlineMs - (Date.now() - startedAt)
+    if (remaining <= 1000) {
+      console.warn('[AI] overall deadline reached — stopping fallback chain')
+      break
+    }
+
     const cfg = providerConfig(entry.provider)
     if (!cfg.key) continue // provider not configured — skip
 
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    const perCallTimeout = Math.min(timeoutMs, remaining)
+    const timeout = setTimeout(() => controller.abort(), perCallTimeout)
 
     try {
       const body: Record<string, unknown> = {

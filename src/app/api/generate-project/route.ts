@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { callAI } from '@/lib/ai'
 
 export const runtime = 'nodejs'
+// Generation can take a while (full AI chain + a repair pass). Request the
+// max Vercel allows so the function isn't killed mid-response — a killed
+// function cuts the HTTP body short, which is what caused the client's
+// "Unexpected end of JSON input" when parsing the truncated response.
+export const maxDuration = 60
 
 export async function POST(request: NextRequest) {
   try {
@@ -178,6 +183,9 @@ INSTRUCTIONS FORMATTING:
       // so they need real headroom — 2048 was truncating mid-solution on longer
       // languages (Java/C++) and harder skill levels, which broke JSON parsing.
       maxTokens: isQuiz ? 4096 : 3500,
+      // Leaves room for the repair call below within Vercel's function limit —
+      // see maxDuration at the top of this file.
+      deadlineMs: 38000,
       jsonMode: true,
       validate: (content) => {
         const parsed = parseChallengeJson(content)
@@ -292,6 +300,9 @@ Output STRICT JSON only, exactly this shape:
     temperature: 0.5,
     topP: 0.95,
     maxTokens: 2048,
+    // Small remaining slice of the function's total time budget — the main
+    // call above already used up to 38s of it.
+    deadlineMs: 18000,
     jsonMode: true,
     validate: (content) => {
       const parsed = parseSolutionJson(content)
@@ -320,7 +331,7 @@ function parseSolutionJson(content: string): { solution?: string; solutionExplan
     return JSON.parse(s)
   } catch {
     try {
-      return JSON.parse(s.replace(/[ --]/g, ''))
+      return JSON.parse(s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ''))
     } catch {
       return null
     }

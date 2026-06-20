@@ -35,8 +35,8 @@ export default function Home() {
             <div className="mt-8 sm:mt-10 flex items-center justify-center gap-3 sm:gap-4 flex-col sm:flex-row">
               <Button size="xl" className="w-full sm:w-auto" asChild>
                 <Link href="/signup">
-                  <ArrowRight className="mr-2 h-5 w-5" />
                   Start Learning Free
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button variant="outline" size="xl" className="w-full sm:w-auto" asChild>
@@ -251,8 +251,8 @@ export default function Home() {
           </p>
           <Button size="xl" className="w-full sm:w-auto" asChild>
             <Link href="/signup">
-              <ArrowRight className="mr-2 h-5 w-5" />
               Start Your Free Journey
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
         </div>

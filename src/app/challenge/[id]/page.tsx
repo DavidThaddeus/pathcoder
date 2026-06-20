@@ -2160,8 +2160,9 @@ function ChallengePage() {
 
       <div className="max-w-6xl mx-auto px-3 sm:px-6 py-5 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
-          {/* Challenge Info Sidebar — shown after the main content on mobile */}
-          <div className="lg:col-span-1 order-2 lg:order-1">
+          {/* Challenge Info Sidebar — Topics, then Details, then Objectives,
+              always before the main instructions/editor content. */}
+          <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-24 space-y-6">
               {/* Topics Covered */}
               <motion.div
@@ -2183,29 +2184,11 @@ function ChallengePage() {
                 </div>
               </motion.div>
 
-              {/* Learning Objectives */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-gray-800 p-4 sm:p-6 rounded-lg"
-              >
-                <h3 className="text-base sm:text-lg font-semibold mb-3">Learning Objectives</h3>
-                <ul className="space-y-2">
-                  {challenge.learningObjectives.map((objective, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <Star size={12} className="text-[#DCC5B2] mt-1 flex-shrink-0" />
-                      <span className="break-words">{objective}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-
               {/* Challenge Details */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.2 }}
                 className="bg-gray-800 p-4 sm:p-6 rounded-lg space-y-3"
               >
                 <h3 className="text-base sm:text-lg font-semibold mb-1">Challenge Details</h3>
@@ -2223,28 +2206,30 @@ function ChallengePage() {
                 </div>
               </motion.div>
 
-              {/* Actions */}
-              <div className="space-y-3">
-                <button
-                  onClick={showHints ? handleHideHints : handleShowHints}
-                  className="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg transition-colors cursor-pointer text-sm sm:text-base"
-                >
-                  <HelpCircle size={16} className="shrink-0" />
-                  {showHints ? 'Hide Hints' : 'Show Hints (−2 coins)'}
-                </button>
-                <button
-                  onClick={handleShowSolution}
-                  className="w-full flex items-center justify-center gap-2 bg-[#DCC5B2] text-black hover:bg-opacity-80 px-4 py-3 rounded-lg transition-colors cursor-pointer text-sm sm:text-base"
-                >
-                  <Code size={16} className="shrink-0" />
-                  Show Solution
-                </button>
-              </div>
+              {/* Learning Objectives */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-gray-800 p-4 sm:p-6 rounded-lg"
+              >
+                <h3 className="text-base sm:text-lg font-semibold mb-3">Learning Objectives</h3>
+                <ul className="space-y-2">
+                  {challenge.learningObjectives.map((objective, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <Star size={12} className="text-[#DCC5B2] mt-1 flex-shrink-0" />
+                      <span className="break-words">{objective}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3 order-1 lg:order-2 min-w-0">
+          {/* Main Content — Instructions/editor, then Hints (with its panel
+              right under the button), then Solution (with its panel right
+              under the button). */}
+          <div className="lg:col-span-3 min-w-0">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -2258,67 +2243,88 @@ function ChallengePage() {
               )}
               {renderChallengeContent()}
 
-              {/* Hints */}
-              {showHints && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden"
+              {/* Hints trigger + its panel, directly underneath */}
+              <div className="space-y-3">
+                <button
+                  onClick={showHints ? handleHideHints : handleShowHints}
+                  className="w-full flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg transition-colors cursor-pointer text-sm sm:text-base"
                 >
-                  <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-gray-700 bg-gray-800/80 gap-2">
-                    <h3 className="text-sm sm:text-base font-semibold text-white flex items-center gap-2 min-w-0">
-                      <HelpCircle size={18} className="text-[#DCC5B2] shrink-0" />
-                      Hints
-                    </h3>
-                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                      <span className="text-xs text-gray-400 tabular-nums">closes in {hintSecondsLeft}s</span>
-                      <button
-                        onClick={handleHideHints}
-                        className="text-gray-400 hover:text-white transition-colors cursor-pointer"
-                        aria-label="Close hints"
-                      >
-                        <X size={18} />
-                      </button>
+                  <HelpCircle size={16} className="shrink-0" />
+                  {showHints ? 'Hide Hints' : 'Show Hints (−2 coins)'}
+                </button>
+
+                {showHints && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gray-800 rounded-xl border border-gray-700 shadow-lg overflow-hidden"
+                  >
+                    <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-gray-700 bg-gray-800/80 gap-2">
+                      <h3 className="text-sm sm:text-base font-semibold text-white flex items-center gap-2 min-w-0">
+                        <HelpCircle size={18} className="text-[#DCC5B2] shrink-0" />
+                        Hints
+                      </h3>
+                      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                        <span className="text-xs text-gray-400 tabular-nums">closes in {hintSecondsLeft}s</span>
+                        <button
+                          onClick={handleHideHints}
+                          className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+                          aria-label="Close hints"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Live countdown bar */}
-                  <div className="h-1 bg-gray-700">
-                    <div
-                      className="h-full bg-[#DCC5B2] transition-all duration-1000 ease-linear"
-                      style={{ width: `${(hintSecondsLeft / 20) * 100}%` }}
-                    />
-                  </div>
+                    {/* Live countdown bar */}
+                    <div className="h-1 bg-gray-700">
+                      <div
+                        className="h-full bg-[#DCC5B2] transition-all duration-1000 ease-linear"
+                        style={{ width: `${(hintSecondsLeft / 20) * 100}%` }}
+                      />
+                    </div>
 
-                  <ul className="p-4 sm:p-5 space-y-3">
-                    {challenge.hints.map((hint, index) => (
-                      <li key={index} className="text-gray-200 text-sm flex items-start gap-3">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#DCC5B2]/20 text-[#DCC5B2] text-xs flex items-center justify-center font-semibold">{index + 1}</span>
-                        <span className="leading-relaxed break-words">{hint}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              )}
+                    <ul className="p-4 sm:p-5 space-y-3">
+                      {challenge.hints.map((hint, index) => (
+                        <li key={index} className="text-gray-200 text-sm flex items-start gap-3">
+                          <span className="flex-shrink-0 w-5 h-5 rounded-full bg-[#DCC5B2]/20 text-[#DCC5B2] text-xs flex items-center justify-center font-semibold">{index + 1}</span>
+                          <span className="leading-relaxed break-words">{hint}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                )}
+              </div>
 
-              {/* Solution — quizzes reveal answers inline in the questions list
-                  above (via quizSubmitted), so this code-solution card is only
-                  relevant for coding/debug challenges. */}
-              {showSolution && challenge.challengeType !== 'quiz' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="bg-green-900 p-4 sm:p-6 rounded-lg border border-green-700"
+              {/* Solution trigger + its panel, directly underneath. Quizzes
+                  reveal answers inline in the questions list above (via
+                  quizSubmitted), so the button still works there but no
+                  separate code panel renders. */}
+              <div className="space-y-3">
+                <button
+                  onClick={handleShowSolution}
+                  className="w-full flex items-center justify-center gap-2 bg-[#DCC5B2] text-black hover:bg-opacity-80 px-4 py-3 rounded-lg transition-colors cursor-pointer text-sm sm:text-base"
                 >
-                  <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-green-200 flex items-center gap-2 sm:gap-3">
-                    <CheckCircle size={22} className="shrink-0" />
-                    ✅ Complete Solution
-                  </h3>
-                  <div className="space-y-6">
-                    {renderSolutionContent(challenge.solution, formattedSolutionCode)}
-                  </div>
-                </motion.div>
-              )}
+                  <Code size={16} className="shrink-0" />
+                  Show Solution
+                </button>
+
+                {showSolution && challenge.challengeType !== 'quiz' && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="bg-green-900 p-4 sm:p-6 rounded-lg border border-green-700"
+                  >
+                    <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 text-green-200 flex items-center gap-2 sm:gap-3">
+                      <CheckCircle size={22} className="shrink-0" />
+                      ✅ Complete Solution
+                    </h3>
+                    <div className="space-y-6">
+                      {renderSolutionContent(challenge.solution, formattedSolutionCode)}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
             </motion.div>
           </div>
         </div>
